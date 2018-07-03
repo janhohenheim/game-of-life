@@ -1,0 +1,14 @@
+{
+  "name": "game_of_life",
+  "version": "0.0.1",
+  "description": "A game of life implemented with Rust and wasm",
+  "repository": "git@github.com:jnferner/game_of_life.git",
+  "author": "Jan Nils Ferner <jn_ferner@hotmail.de>",
+  "license": "MIT",
+  "private": false,
+  "devDependencies": {
+    "webpack": "^4.14.0",
+    "webpack-cli": "^3.0.8",
+    "webpack-dev-server": "^3.1.4"
+  }
+}
