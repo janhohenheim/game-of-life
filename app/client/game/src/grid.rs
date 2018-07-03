@@ -7,6 +7,7 @@ pub trait Grid {
     fn set_dead_at(&mut self, x: usize, y: usize);
 }
 
+#[derive(Debug, Eq, PartialEq)]
 pub struct OneDimensionalBoolGrid {
     grid: Vec<bool>,
     width: usize,
@@ -49,7 +50,7 @@ impl Grid for OneDimensionalBoolGrid {
 
 #[cfg(test)]
 mod one_dimensional_bool_grid_test {
-    use grid::{Grid, OneDimensionalBoolGrid};
+    use super::{Grid, OneDimensionalBoolGrid};
 
     #[test]
     fn grid_has_correct_width() {

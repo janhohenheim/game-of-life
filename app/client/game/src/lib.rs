@@ -1,9 +1,9 @@
-#![feature(proc_macro, wasm_custom_section, wasm_import_module)]
+#![feature(proc_macro, wasm_custom_section, wasm_import_module, crate_in_paths)]
 
 use wasm_bindgen::prelude::*;
 extern crate wasm_bindgen;
-
 mod grid;
+mod generation;
 
 #[wasm_bindgen]
 extern "C" {
