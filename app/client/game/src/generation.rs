@@ -5,52 +5,51 @@ trait GenerationCalculator<T: Grid> {
 }
 
 #[derive(Debug)]
-struct ProceduralGenerationCalculator;
+struct DeathFrameGenerationCalculator;
 
-impl<T: Grid> GenerationCalculator<T> for ProceduralGenerationCalculator {
+impl<T: Grid> GenerationCalculator<T> for DeathFrameGenerationCalculator {
     fn next_generation(&self, grid: T) -> T {
         T::new(grid.width(), grid.height())
     }
 }
 
 #[cfg(test)]
-mod procedural_generation_calculator_test {
+mod death_framed_generation_calculator_test {
     use crate::grid::{Grid, OneDimensionalBoolGrid};
-    use super::{GenerationCalculator, ProceduralGenerationCalculator};
+    use super::{DeathFrameGenerationCalculator, GenerationCalculator};
 
     #[test]
     fn dead_grid_stays_dead() {
-        let generation_calculator = ProceduralGenerationCalculator {};
+        let generation_calculator = DeathFrameGenerationCalculator {};
         let dead_grid = OneDimensionalBoolGrid::new(5, 4);
         let next_generation = generation_calculator.next_generation(dead_grid);
 
         let dead_grid = OneDimensionalBoolGrid::new(5, 4);
         assert_eq!(dead_grid, next_generation);
     }
+
+    #[test]
+    fn lone_alive_cell_dies() {
+        let generation_calculator = DeathFrameGenerationCalculator {};
+        let mut grid = OneDimensionalBoolGrid::new(3, 3);
+        grid.set_alive_at(1, 1);
+        let next_generation = generation_calculator.next_generation(grid);
+
+        let dead_grid = OneDimensionalBoolGrid::new(3, 3);
+        assert_eq!(dead_grid, next_generation);
+    }
+
+    #[test]
+    fn alive_cell_in_corner_dies() {
+        let generation_calculator = DeathFrameGenerationCalculator {};
+        let mut grid = OneDimensionalBoolGrid::new(3, 3);
+        grid.set_dead_at(0, 0);
+        let next_generation = generation_calculator.next_generation(grid);
+
+        let dead_grid = OneDimensionalBoolGrid::new(3, 3);
+        assert_eq!(dead_grid, next_generation);
+    }
     /*
-
-        #[test]
-        fn TestLoneAliveCellDies()
-        {
-            IGrid grid = new Grid(3, 3);
-            grid[1, 1] = new Cell(true);
-            var nextGen = _game.NextGeneration(grid);
-
-            IGrid deadGrid = new Grid(3, 3);
-            assert_eq!(deadGrid, nextGen);
-        }
-
-
-        #[test]
-        fn TestAliveCellInCornerDies()
-        {
-            IGrid grid = new Grid(3, 3);
-            grid[0, 0] = new Cell(true);
-            var nextGen = _game.NextGeneration(grid);
-
-            IGrid deadGrid = new Grid(3, 3);
-            assert_eq!(deadGrid, nextGen);
-        }
 
         #[test]
         fn TestAliveCellInCornerWithNeighbourDies()
@@ -58,10 +57,10 @@ mod procedural_generation_calculator_test {
             IGrid grid = new Grid(3, 3);
             grid[0, 0] = new Cell(true);
             grid[1, 1] = new Cell(true);
-            var nextGen = _game.NextGeneration(grid);
+            let next_generation = generation_calculator.next_generation(grid);
 
-            IGrid deadGrid = new Grid(3, 3);
-            assert_eq!(deadGrid, nextGen);
+            IGrid dead_grid = new Grid(3, 3);
+            assert_eq!(dead_grid, next_generation);
         }
 
         #[test]
@@ -76,11 +75,11 @@ mod procedural_generation_calculator_test {
             grid[0, 0] = new Cell(true);
             grid[0, 1] = new Cell(true);
             grid[1, 1] = new Cell(true);
-            var nextGen = _game.NextGeneration(grid);
+            let next_generation = generation_calculator.next_generation(grid);
 
-            Assert.IsTrue(nextGen[0, 0].IsAlive);
-            Assert.IsTrue(nextGen[0, 1].IsAlive);
-            Assert.IsTrue(nextGen[1, 1].IsAlive);
+            Assert.IsTrue(next_generation[0, 0].IsAlive);
+            Assert.IsTrue(next_generation[0, 1].IsAlive);
+            Assert.IsTrue(next_generation[1, 1].IsAlive);
         }
 
         #[test]
@@ -97,9 +96,9 @@ mod procedural_generation_calculator_test {
             grid[0, 2] = new Cell(true);
             grid[2, 0] = new Cell(true);
             grid[1, 1] = new Cell(true);
-            var nextGen = _game.NextGeneration(grid);
+            let next_generation = generation_calculator.next_generation(grid);
 
-            Assert.IsFalse(nextGen[1, 1].IsAlive);
+            Assert.IsFalse(next_generation[1, 1].IsAlive);
         }
 
         #[test]
@@ -116,9 +115,9 @@ mod procedural_generation_calculator_test {
             grid[0, 2] = new Cell(true);
             grid[2, 0] = new Cell(true);
             grid[1, 1] = new Cell(true);
-            var nextGen = _game.NextGeneration(grid);
+            let next_generation = generation_calculator.next_generation(grid);
 
-            Assert.IsTrue(nextGen[1, 2].IsAlive);
+            Assert.IsTrue(next_generation[1, 2].IsAlive);
         }
 
         #[test]
@@ -135,9 +134,9 @@ mod procedural_generation_calculator_test {
             grid[0, 2] = new Cell(true);
             grid[2, 0] = new Cell(true);
             grid[1, 1] = new Cell(true);
-            var nextGen = _game.NextGeneration(grid);
+            let next_generation = generation_calculator.next_generation(grid);
 
-            Assert.IsFalse(nextGen[1, 0].IsAlive);
+            Assert.IsFalse(next_generation[1, 0].IsAlive);
         }
 
         #[test]
@@ -154,9 +153,9 @@ mod procedural_generation_calculator_test {
             grid[1, 2] = new Cell(true);
             grid[2, 1] = new Cell(true);
             grid[2, 2] = new Cell(true);
-            var nextGen = _game.NextGeneration(grid);
+            let next_generation = generation_calculator.next_generation(grid);
 
-            assert_eq!(grid, nextGen);
+            assert_eq!(grid, next_generation);
         }
 
         #[test]
@@ -171,7 +170,7 @@ mod procedural_generation_calculator_test {
             grid[0, 1] = new Cell(true);
             grid[1, 1] = new Cell(true);
             grid[2, 1] = new Cell(true);
-            var nextGen = _game.NextGeneration(grid);
+            let next_generation = generation_calculator.next_generation(grid);
 
             IGrid expected = new Grid(3, 3);
             /*
@@ -182,7 +181,7 @@ mod procedural_generation_calculator_test {
             expected[1, 0] = new Cell(true);
             expected[1, 1] = new Cell(true);
             expected[1, 2] = new Cell(true);
-            assert_eq!(expected, nextGen);
+            assert_eq!(expected, next_generation);
         }
 
         #[test]
@@ -197,7 +196,7 @@ mod procedural_generation_calculator_test {
             grid[1, 0] = new Cell(true);
             grid[1, 1] = new Cell(true);
             grid[1, 2] = new Cell(true);
-            var nextGen = _game.NextGeneration(grid);
+            let next_generation = generation_calculator.next_generation(grid);
 
             IGrid expected = new Grid(3, 3);
             /*
@@ -208,7 +207,7 @@ mod procedural_generation_calculator_test {
             expected[0, 1] = new Cell(true);
             expected[1, 1] = new Cell(true);
             expected[2, 1] = new Cell(true);
-            assert_eq!(expected, nextGen);
+            assert_eq!(expected, next_generation);
         }
     */
 }
