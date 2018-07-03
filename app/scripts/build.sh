@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 application_name=game
 target_dir=wasm_generated
 rust_crates=(./app/client/game)

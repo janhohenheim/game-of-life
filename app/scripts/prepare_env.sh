@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+if [[ $UID != 0 ]]; then
+    echo "Please run this script with sudo:"
+    echo "sudo $0 $*"
+    exit 1
+fi
+
 curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
 rustup target add wasm32-unknown-unknown --toolchain nightly
 cargo install wasm-bindgen-cli
