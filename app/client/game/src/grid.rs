@@ -13,10 +13,16 @@ pub struct OneDimensionalBoolGrid {
     height: usize,
 }
 
+impl OneDimensionalBoolGrid {
+    fn translate_coordinates_to_index(&self, x: usize, y: usize) -> usize {
+        self.width() * y + x
+    }
+}
+
 impl Grid for OneDimensionalBoolGrid {
     fn new(width: usize, height: usize) -> Self {
         OneDimensionalBoolGrid {
-            grid: Vec::new(),
+            grid: vec![false; width * height],
             width,
             height,
         }
@@ -28,13 +34,16 @@ impl Grid for OneDimensionalBoolGrid {
         self.height
     }
     fn is_alive_at(&self, x: usize, y: usize) -> bool {
-        unimplemented!()
+        let index = self.translate_coordinates_to_index(x, y);
+        self.grid[index]
     }
     fn set_alive_at(&mut self, x: usize, y: usize) {
-        unimplemented!()
+        let index = self.translate_coordinates_to_index(x, y);
+        self.grid[index] = true;
     }
     fn set_dead_at(&mut self, x: usize, y: usize) {
-        unimplemented!()
+        let index = self.translate_coordinates_to_index(x, y);
+        self.grid[index] = false;
     }
 }
 
