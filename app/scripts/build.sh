@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 application_name=game
 target_dir=wasm_generated
