@@ -1,11 +1,11 @@
-use super::grid::Grid;
+use crate::grid::Grid;
 
-trait GenerationCalculator<T: Grid> {
+pub trait GenerationCalculator<T: Grid> {
     fn next_generation(&self, grid: T) -> T;
 }
 
 #[derive(Debug)]
-struct DeathFrameGenerationCalculator;
+pub struct DeathFrameGenerationCalculator;
 
 impl<T> GenerationCalculator<T> for DeathFrameGenerationCalculator
 where
