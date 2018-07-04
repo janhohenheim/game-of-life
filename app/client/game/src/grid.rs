@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 pub trait Grid {
     fn new(width: usize, height: usize) -> Self;
     fn width(&self) -> usize;
@@ -48,6 +50,14 @@ impl Grid for OneDimensionalBoolGrid {
     }
 }
 
+impl Deref for OneDimensionalBoolGrid {
+    type Target = [bool];
+
+    fn deref<'a>(&'a self) -> &'a Self::Target {
+        self.grid.as_slice()
+    }
+}
+
 #[cfg(test)]
 mod one_dimensional_bool_grid_test {
     use super::{Grid, OneDimensionalBoolGrid};
@@ -67,10 +77,8 @@ mod one_dimensional_bool_grid_test {
     #[test]
     fn grid_inits_dead() {
         let grid = OneDimensionalBoolGrid::new(10, 10);
-        for x in 0..grid.width() {
-            for y in 0..grid.height() {
-                assert_eq!(false, grid.is_alive_at(x, y))
-            }
+        for cell_is_alive in grid.iter() {
+            assert_eq!(false, *cell_is_alive)
         }
     }
 

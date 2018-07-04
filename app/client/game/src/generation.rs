@@ -7,10 +7,62 @@ trait GenerationCalculator<T: Grid> {
 #[derive(Debug)]
 struct DeathFrameGenerationCalculator;
 
-impl<T: Grid> GenerationCalculator<T> for DeathFrameGenerationCalculator {
+impl<T> GenerationCalculator<T> for DeathFrameGenerationCalculator
+where
+    T: Grid + Clone,
+{
     fn next_generation(&self, grid: T) -> T {
-        T::new(grid.width(), grid.height())
+        let mut next_generation = grid.clone();
+        for x in 0..grid.width() {
+            for y in 0..grid.height() {
+                let neighbours = count_neighbours_at(&grid, x, y).expect("x or y out of bounds");
+                match neighbours {
+                    n if n < 2 || n > 3 => next_generation.set_dead_at(x, y),
+                    n if n == 3 => next_generation.set_alive_at(x, y),
+                    _ => {}
+                };
+            }
+        }
+        next_generation
     }
+}
+
+fn count_neighbours_at<T: Grid>(grid: &T, x: usize, y: usize) -> Option<usize> {
+    if x >= grid.width() || y >= grid.height() {
+        return None;
+    }
+
+    let top = y == 0;
+    let right = x == grid.width() - 1;
+    let bottom = y == grid.height() - 1;
+    let left = x == 0;
+
+    let mut neighbours = 0;
+    if !top && grid.is_alive_at(x, y - 1) {
+        neighbours += 1;
+    }
+    if !top && !right && grid.is_alive_at(x + 1, y - 1) {
+        neighbours += 1;
+    }
+    if !right && grid.is_alive_at(x + 1, y) {
+        neighbours += 1;
+    }
+    if !right && !bottom && grid.is_alive_at(x + 1, y + 1) {
+        neighbours += 1;
+    }
+    if !bottom && grid.is_alive_at(x, y + 1) {
+        neighbours += 1;
+    }
+    if !left && !bottom && grid.is_alive_at(x - 1, y + 1) {
+        neighbours += 1;
+    }
+    if !left && grid.is_alive_at(x - 1, y) {
+        neighbours += 1;
+    }
+    if !left && !top && grid.is_alive_at(x - 1, y - 1) {
+        neighbours += 1;
+    }
+    Some(neighbours)
 }
 
 #[cfg(test)]
