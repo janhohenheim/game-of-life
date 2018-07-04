@@ -21,4 +21,4 @@ yarn
 
 # The following assumes the env vars CADDY_ACCOUNT_ID and CADDY_API_KEY
 # You can find their values at https://caddyserver.com/account/dashboard
-curl https://getcaddy.com | bash -s personal
+sudo curl https://getcaddy.com | bash -s personal
