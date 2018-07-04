@@ -1,8 +1,6 @@
 extern crate wasm_bindgen;
 use wasm_bindgen::prelude::*;
 
-use crate::constant;
-
 #[wasm_bindgen]
 extern "C" {
     pub type CanvasRenderingContext2D;
@@ -23,10 +21,4 @@ extern "C" {
     fn now() -> f64;
 
     fn alert(s: &str);
-}
-
-#[wasm_bindgen]
-pub fn init_board(context: CanvasRenderingContext2D) {
-    context.set_fill_style("aquamarine");
-    context.fill_rect(0, 0, constant::BOARD_WIDTH, constant::BOARD_HEIGHT);
 }
