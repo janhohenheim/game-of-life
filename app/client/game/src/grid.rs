@@ -7,7 +7,7 @@ pub trait Grid {
     fn set_dead_at(&mut self, x: usize, y: usize);
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub struct OneDimensionalBoolGrid {
     grid: Vec<bool>,
     width: usize,
