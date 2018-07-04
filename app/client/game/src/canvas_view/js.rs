@@ -14,11 +14,23 @@ extern "C" {
     #[wasm_bindgen(method, js_name = clearRect)]
     pub fn clear_rect(this: &CanvasRenderingContext2D, x: u32, y: u32, width: u32, height: u32);
 
+    #[wasm_bindgen(method, js_name = beginPath)]
+    pub fn begin_path(this: &CanvasRenderingContext2D);
+
+    #[wasm_bindgen(method, js_name = moveTo)]
+    pub fn move_to(this: &CanvasRenderingContext2D, x: u32, y: u32);
+
+    #[wasm_bindgen(method, js_name = lineTo)]
+    pub fn line_to(this: &CanvasRenderingContext2D, x: u32, y: u32);
+
+    #[wasm_bindgen(method)]
+    pub fn fill(this: &CanvasRenderingContext2D);
+
+    #[wasm_bindgen(method)]
+    pub fn stroke(this: &CanvasRenderingContext2D);
+
     #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
+    pub fn log(s: &str);
 
-    #[wasm_bindgen(js_namespace = Date)]
-    fn now() -> f64;
-
-    fn alert(s: &str);
+//pub fn alert(s: &str);
 }
