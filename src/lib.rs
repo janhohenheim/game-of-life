@@ -4,4 +4,5 @@ extern crate wasm_bindgen;
 
 mod grid;
 mod generation;
+mod controller;
 pub mod canvas_view;
