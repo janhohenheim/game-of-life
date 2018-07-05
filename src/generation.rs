@@ -83,8 +83,8 @@ fn count_neighbours_at<T: Grid>(grid: &T, x: usize, y: usize) -> Option<usize> {
 
 #[cfg(test)]
 mod death_framed_generation_calculator_test {
-    use crate::grid::{Grid, OneDimensionalBoolGrid};
     use super::{Change, DeathFrameGenerationCalculator, GenerationCalculator};
+    use crate::grid::{Grid, OneDimensionalBoolGrid};
 
     #[test]
     fn dead_grid_stays_dead() {

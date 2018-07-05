@@ -1,5 +1,5 @@
-use grid::Grid;
 use generation::{Change, GenerationCalculator};
+use grid::Grid;
 
 pub trait Presenter {
     fn set_present_change_fn(&mut self, fun: Fn(Change));
