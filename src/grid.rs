@@ -53,7 +53,7 @@ impl Grid for OneDimensionalBoolGrid {
 impl Deref for OneDimensionalBoolGrid {
     type Target = [bool];
 
-    fn deref<'a>(&'a self) -> &'a Self::Target {
+    fn deref(&self) -> &Self::Target {
         self.grid.as_slice()
     }
 }

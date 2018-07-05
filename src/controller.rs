@@ -1,8 +1,8 @@
-use grid::{Grid, OneDimensionalBoolGrid};
-use generation::{Change, DeathFrameGenerationCalculator, GenerationCalculator};
+use grid::Grid;
+use generation::{Change, GenerationCalculator};
 
 pub trait Presenter {
-    fn set_present_dead_at_fn(&mut self, fun: Fn(usize, usize));
+    fn set_present_change_fn(&mut self, fun: Fn(Change));
 }
 
 pub trait Controller {}

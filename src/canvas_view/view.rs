@@ -5,7 +5,7 @@ use super::constant;
 use super::js;
 
 #[wasm_bindgen]
-pub fn init_board(context: js::CanvasRenderingContext2D) {
+pub fn init_board(context: &js::CanvasRenderingContext2D) {
     context.set_fill_style("aquamarine");
     context.fill_rect(0, 0, constant::BOARD_WIDTH, constant::BOARD_HEIGHT);
     context.set_fill_style("white");
