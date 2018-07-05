@@ -2,5 +2,5 @@
 set -e
 
 ./app/scripts/build.sh
-ulimit -n 8192
+ulimit -n 8192 || true
 caddy
