@@ -1,5 +1,5 @@
 [package]
-name = "game"
+name = "game_of_life"
 version = "0.1.0"
 authors = ["Jan Nils Ferner <jn_ferner@hotmail.de>"]
 

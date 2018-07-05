@@ -9,8 +9,3 @@ body {
     align-items: center;
     min-height: 100vh;
 }
-
-.game-board {
-    width: 1000px;
-    height: 1000px;
-}
