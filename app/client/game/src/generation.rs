@@ -1,7 +1,14 @@
 use crate::grid::Grid;
 
+#[derive(Debug, Eq, PartialEq)]
+pub struct Change {
+    x: usize,
+    y: usize,
+    is_alive: bool,
+}
+
 pub trait GenerationCalculator<T: Grid> {
-    fn next_generation(&self, grid: T) -> T;
+    fn next_generation(&self, grid: &T) -> Vec<Change>;
 }
 
 #[derive(Debug)]
@@ -9,21 +16,30 @@ pub struct DeathFrameGenerationCalculator;
 
 impl<T> GenerationCalculator<T> for DeathFrameGenerationCalculator
 where
-    T: Grid + Clone,
+    T: Grid,
 {
-    fn next_generation(&self, grid: T) -> T {
-        let mut next_generation = grid.clone();
-        for x in 0..grid.width() {
-            for y in 0..grid.height() {
-                let neighbours = count_neighbours_at(&grid, x, y).expect("x or y out of bounds");
-                match neighbours {
-                    n if n < 2 || n > 3 => next_generation.set_dead_at(x, y),
-                    n if n == 3 => next_generation.set_alive_at(x, y),
-                    _ => {}
-                };
+    fn next_generation(&self, grid: &T) -> Vec<Change> {
+        let mut changes = Vec::new();
+        for y in 0..grid.height() {
+            for x in 0..grid.width() {
+                let neighbours = count_neighbours_at(grid, x, y).expect("x or y out of bounds");
+                let is_alive = grid.is_alive_at(x, y);
+                if is_alive && (neighbours < 2 || neighbours > 3) {
+                    changes.push(Change {
+                        x,
+                        y,
+                        is_alive: false,
+                    });
+                } else if !is_alive && neighbours == 3 {
+                    changes.push(Change {
+                        x,
+                        y,
+                        is_alive: true,
+                    })
+                }
             }
         }
-        next_generation
+        changes
     }
 }
 
@@ -68,16 +84,15 @@ fn count_neighbours_at<T: Grid>(grid: &T, x: usize, y: usize) -> Option<usize> {
 #[cfg(test)]
 mod death_framed_generation_calculator_test {
     use crate::grid::{Grid, OneDimensionalBoolGrid};
-    use super::{DeathFrameGenerationCalculator, GenerationCalculator};
+    use super::{Change, DeathFrameGenerationCalculator, GenerationCalculator};
 
     #[test]
     fn dead_grid_stays_dead() {
         let generation_calculator = DeathFrameGenerationCalculator {};
         let dead_grid = OneDimensionalBoolGrid::new(5, 4);
-        let next_generation = generation_calculator.next_generation(dead_grid);
+        let changes = generation_calculator.next_generation(&dead_grid);
 
-        let dead_grid = OneDimensionalBoolGrid::new(5, 4);
-        assert_eq!(dead_grid, next_generation);
+        assert_eq!(0, changes.len());
     }
 
     #[test]
@@ -85,21 +100,31 @@ mod death_framed_generation_calculator_test {
         let generation_calculator = DeathFrameGenerationCalculator {};
         let mut grid = OneDimensionalBoolGrid::new(3, 3);
         grid.set_alive_at(1, 1);
-        let next_generation = generation_calculator.next_generation(grid);
+        let changes = generation_calculator.next_generation(&grid);
 
-        let dead_grid = OneDimensionalBoolGrid::new(3, 3);
-        assert_eq!(dead_grid, next_generation);
+        assert_eq!(1, changes.len());
+        let expected = Change {
+            x: 1,
+            y: 1,
+            is_alive: false,
+        };
+        assert_eq!(expected, changes[0]);
     }
 
     #[test]
     fn alive_cell_in_corner_dies() {
         let generation_calculator = DeathFrameGenerationCalculator {};
         let mut grid = OneDimensionalBoolGrid::new(3, 3);
-        grid.set_dead_at(0, 0);
-        let next_generation = generation_calculator.next_generation(grid);
+        grid.set_alive_at(0, 0);
+        let changes = generation_calculator.next_generation(&grid);
 
-        let dead_grid = OneDimensionalBoolGrid::new(3, 3);
-        assert_eq!(dead_grid, next_generation);
+        assert_eq!(1, changes.len());
+        let expected = Change {
+            x: 0,
+            y: 0,
+            is_alive: false,
+        };
+        assert_eq!(expected, changes[0]);
     }
 
     #[test]
@@ -108,14 +133,25 @@ mod death_framed_generation_calculator_test {
         let mut grid = OneDimensionalBoolGrid::new(3, 3);
         grid.set_alive_at(0, 0);
         grid.set_alive_at(1, 1);
-        let next_generation = generation_calculator.next_generation(grid);
+        let changes = generation_calculator.next_generation(&grid);
 
-        let dead_grid = OneDimensionalBoolGrid::new(3, 3);
-        assert_eq!(dead_grid, next_generation);
+        assert_eq!(2, changes.len());
+        let expected = Change {
+            x: 0,
+            y: 0,
+            is_alive: false,
+        };
+        assert_eq!(expected, changes[0]);
+        let expected = Change {
+            x: 1,
+            y: 1,
+            is_alive: false,
+        };
+        assert_eq!(expected, changes[1]);
     }
 
     #[test]
-    fn alive_cell_with_two_neighbours_survives() {
+    fn dead_cell_with_three_neighbours_resurrects() {
         let generation_calculator = DeathFrameGenerationCalculator {};
         let mut grid = OneDimensionalBoolGrid::new(3, 3);
         /*
@@ -126,68 +162,69 @@ mod death_framed_generation_calculator_test {
         grid.set_alive_at(0, 0);
         grid.set_alive_at(0, 1);
         grid.set_alive_at(1, 1);
-        let next_generation = generation_calculator.next_generation(grid);
+        let changes = generation_calculator.next_generation(&grid);
 
-        assert!(next_generation.is_alive_at(0, 0));
-        assert!(next_generation.is_alive_at(0, 1));
-        assert!(next_generation.is_alive_at(1, 1));
+        assert_eq!(1, changes.len());
+        let expected = Change {
+            x: 1,
+            y: 0,
+            is_alive: true,
+        };
+        assert_eq!(expected, changes[0]);
     }
 
     #[test]
     fn alive_cell_with_four_neighbours_dies() {
         let generation_calculator = DeathFrameGenerationCalculator {};
-        let mut grid = OneDimensionalBoolGrid::new(3, 3);
+        let mut grid = OneDimensionalBoolGrid::new(3, 2);
         /*
-         * O | . | O
-         * O | O | .
-         * O | . | .
+         * . | O | O
+         * O | O | O
          */
-        grid.set_alive_at(0, 0);
-        grid.set_alive_at(0, 1);
-        grid.set_alive_at(0, 2);
+        grid.set_alive_at(1, 0);
         grid.set_alive_at(2, 0);
-        grid.set_alive_at(1, 1);
-        let next_generation = generation_calculator.next_generation(grid);
-
-        assert_eq!(false, next_generation.is_alive_at(1, 1));
-    }
-
-    #[test]
-    fn dead_cell_with_three_neighbours_resurrects() {
-        let generation_calculator = DeathFrameGenerationCalculator {};
-        let mut grid = OneDimensionalBoolGrid::new(3, 3);
-        /*
-         * O | . | O
-         * O | O | .
-         * O | . | .
-         */
-        grid.set_alive_at(0, 0);
         grid.set_alive_at(0, 1);
-        grid.set_alive_at(0, 2);
-        grid.set_alive_at(2, 0);
         grid.set_alive_at(1, 1);
-        let next_generation = generation_calculator.next_generation(grid);
+        grid.set_alive_at(2, 1);
+        let changes = generation_calculator.next_generation(&grid);
 
-        assert!(next_generation.is_alive_at(1, 2));
+        assert_eq!(3, changes.len());
+        let expected = Change {
+            x: 0,
+            y: 0,
+            is_alive: true,
+        };
+        assert_eq!(expected, changes[0]);
+        let expected = Change {
+            x: 1,
+            y: 0,
+            is_alive: false,
+        };
+        assert_eq!(expected, changes[1]);
+        let expected = Change {
+            x: 1,
+            y: 1,
+            is_alive: false,
+        };
+        assert_eq!(expected, changes[2]);
     }
 
     #[test]
     fn dead_cell_with_four_neighbours_stays_dead() {
         let generation_calculator = DeathFrameGenerationCalculator {};
-        let mut grid = OneDimensionalBoolGrid::new(3, 3);
+        let mut grid = OneDimensionalBoolGrid::new(3, 2);
         /*
+         * O | O | O
          * O | . | O
-         * O | O | .
-         * O | . | .
          */
         grid.set_alive_at(0, 0);
-        grid.set_alive_at(0, 1);
-        grid.set_alive_at(0, 2);
+        grid.set_alive_at(1, 0);
         grid.set_alive_at(2, 0);
-        grid.set_alive_at(1, 1);
-        let next_generation = generation_calculator.next_generation(grid);
+        grid.set_alive_at(0, 1);
+        grid.set_alive_at(2, 1);
+        let changes = generation_calculator.next_generation(&grid);
 
-        assert_eq!(false, next_generation.is_alive_at(1, 0));
+        assert_eq!(1, changes.len());
     }
 
     #[test]
@@ -204,9 +241,8 @@ mod death_framed_generation_calculator_test {
         grid.set_alive_at(1, 2);
         grid.set_alive_at(2, 1);
         grid.set_alive_at(2, 2);
-        let original = grid.clone();
-        let next_generation = generation_calculator.next_generation(grid);
-        assert_eq!(original, next_generation);
+        let changes = generation_calculator.next_generation(&grid);
+        assert_eq!(0, changes.len());
     }
 
     #[test]
@@ -221,18 +257,38 @@ mod death_framed_generation_calculator_test {
         grid.set_alive_at(0, 1);
         grid.set_alive_at(1, 1);
         grid.set_alive_at(2, 1);
-        let next_generation = generation_calculator.next_generation(grid);
+        let changes = generation_calculator.next_generation(&grid);
 
-        let mut expected = OneDimensionalBoolGrid::new(3, 3);
         /*
          * . | O | .
          * . | O | .
          * . | O | .
          */
-        expected.set_alive_at(1, 0);
-        expected.set_alive_at(1, 1);
-        expected.set_alive_at(1, 2);
-        assert_eq!(expected, next_generation);
+        assert_eq!(4, changes.len());
+        let expected = Change {
+            x: 1,
+            y: 0,
+            is_alive: true,
+        };
+        assert_eq!(expected, changes[0]);
+        let expected = Change {
+            x: 0,
+            y: 1,
+            is_alive: false,
+        };
+        assert_eq!(expected, changes[1]);
+        let expected = Change {
+            x: 2,
+            y: 1,
+            is_alive: false,
+        };
+        assert_eq!(expected, changes[2]);
+        let expected = Change {
+            x: 1,
+            y: 2,
+            is_alive: true,
+        };
+        assert_eq!(expected, changes[3]);
     }
 
     #[test]
@@ -247,17 +303,37 @@ mod death_framed_generation_calculator_test {
         grid.set_alive_at(1, 0);
         grid.set_alive_at(1, 1);
         grid.set_alive_at(1, 2);
-        let next_generation = generation_calculator.next_generation(grid);
+        let changes = generation_calculator.next_generation(&grid);
 
-        let mut expected = OneDimensionalBoolGrid::new(3, 3);
         /*
          * . | . | .
          * O | O | O
          * . | . | .
          */
-        expected.set_alive_at(0, 1);
-        expected.set_alive_at(1, 1);
-        expected.set_alive_at(2, 1);
-        assert_eq!(expected, next_generation);
+        assert_eq!(4, changes.len());
+        let expected = Change {
+            x: 1,
+            y: 0,
+            is_alive: false,
+        };
+        assert_eq!(expected, changes[0]);
+        let expected = Change {
+            x: 0,
+            y: 1,
+            is_alive: true,
+        };
+        assert_eq!(expected, changes[1]);
+        let expected = Change {
+            x: 2,
+            y: 1,
+            is_alive: true,
+        };
+        assert_eq!(expected, changes[2]);
+        let expected = Change {
+            x: 1,
+            y: 2,
+            is_alive: false,
+        };
+        assert_eq!(expected, changes[3]);
     }
 }
