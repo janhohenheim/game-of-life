@@ -6,3 +6,4 @@ pub mod canvas_view;
 mod controller;
 mod generation;
 mod grid;
+mod constant;

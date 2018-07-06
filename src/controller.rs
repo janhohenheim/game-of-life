@@ -51,6 +51,7 @@ impl Controller for ControllerImpl {
 mod controller_impl_test {
     use super::*;
 
+    #[derive(Default)]
     struct MockPresenter {
         controller: Option<Weak<RefCell<Controller>>>,
         width: u32,
@@ -59,6 +60,10 @@ mod controller_impl_test {
     }
 
     impl MockPresenter {
+        fn new() -> Self {
+            Default::default()
+        }
+
         fn mock_change(&mut self, change: Change) {
             if let Some(ref controller) = self.controller {
                 if let Some(ref controller) = controller.upgrade() {
@@ -96,6 +101,11 @@ mod controller_impl_test {
     }
 
     struct MockGenerationCalculator;
+    impl MockGenerationCalculator {
+        fn new() -> Self {
+            MockGenerationCalculator {}
+        }
+    }
     impl GenerationCalculator for MockGenerationCalculator {
         fn next_generation(&self, grid: &Box<Grid>) -> Vec<Change> {
             vec![
@@ -108,5 +118,14 @@ mod controller_impl_test {
         }
     }
 
-    fn test() {}
+    fn create_controller() -> Rc<RefCell<Controller>> {
+        let presenter = Box::new(MockPresenter::new());
+        let generation_calculator = Box::new(MockGenerationCalculator::new());
+        ControllerImpl::new(presenter, generation_calculator)
+    }
+
+    fn test_inits_board() {
+        let controller = create_controller();
+        controller.start();
+    }
 }

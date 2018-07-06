@@ -1,7 +1,7 @@
 extern crate wasm_bindgen;
 use wasm_bindgen::prelude::*;
 
-use super::constant;
+use crate::constant;
 use super::js;
 
 #[wasm_bindgen]
