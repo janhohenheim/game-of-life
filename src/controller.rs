@@ -20,8 +20,8 @@ pub trait Controller {
 }
 
 pub struct ControllerImpl {
-    presenter: Box<Presenter>,
-    generation_calculator: Box<GenerationCalculator>,
+    pub presenter: Box<Presenter>,
+    pub generation_calculator: Box<GenerationCalculator>,
 }
 
 impl ControllerImpl {
@@ -126,6 +126,6 @@ mod controller_impl_test {
 
     fn test_inits_board() {
         let controller = create_controller();
-        controller.start();
+        controller.borrow_mut().start();
     }
 }
