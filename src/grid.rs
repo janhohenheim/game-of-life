@@ -1,7 +1,6 @@
 use std::ops::Deref;
 
 pub trait Grid {
-    fn new(width: usize, height: usize) -> Self;
     fn width(&self) -> usize;
     fn height(&self) -> usize;
     fn is_alive_at(&self, x: usize, y: usize) -> bool;
@@ -17,19 +16,20 @@ pub struct OneDimensionalBoolGrid {
 }
 
 impl OneDimensionalBoolGrid {
-    fn translate_coordinates_to_index(&self, x: usize, y: usize) -> usize {
-        self.width() * y + x
-    }
-}
-
-impl Grid for OneDimensionalBoolGrid {
-    fn new(width: usize, height: usize) -> Self {
+    pub fn new(width: usize, height: usize) -> Self {
         OneDimensionalBoolGrid {
             grid: vec![false; width * height],
             width,
             height,
         }
     }
+
+    fn translate_coordinates_to_index(&self, x: usize, y: usize) -> usize {
+        self.width() * y + x
+    }
+}
+
+impl Grid for OneDimensionalBoolGrid {
     fn width(&self) -> usize {
         self.width
     }

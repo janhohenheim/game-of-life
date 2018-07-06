@@ -16,15 +16,15 @@ pub trait Controller {
     fn notify(&mut self, event: PresenterEvent);
 }
 
-pub struct ControllerImpl<G: Grid> {
+pub struct ControllerImpl {
     presenter: Box<Presenter>,
-    generation_calculator: Box<GenerationCalculator<G>>,
+    generation_calculator: Box<GenerationCalculator>,
 }
 
-impl<G: Grid> ControllerImpl<G> {
+impl ControllerImpl {
     fn new(
         presenter: Box<Presenter>,
-        generation_calculator: Box<GenerationCalculator<G>>,
+        generation_calculator: Box<GenerationCalculator>,
     ) -> Rc<RefCell<Self>> {
         let controller = Rc::new(RefCell::new(ControllerImpl {
             presenter,
@@ -39,6 +39,6 @@ impl<G: Grid> ControllerImpl<G> {
     }
 }
 
-impl<G: Grid> Controller for ControllerImpl<G> {
+impl Controller for ControllerImpl {
     fn notify(&mut self, event: PresenterEvent) {}
 }

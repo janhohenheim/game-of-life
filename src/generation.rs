@@ -7,18 +7,15 @@ pub struct Change {
     is_alive: bool,
 }
 
-pub trait GenerationCalculator<T: Grid> {
-    fn next_generation(&self, grid: &T) -> Vec<Change>;
+pub trait GenerationCalculator {
+    fn next_generation(&self, grid: &Box<Grid>) -> Vec<Change>;
 }
 
 #[derive(Debug)]
 pub struct DeathFrameGenerationCalculator;
 
-impl<T> GenerationCalculator<T> for DeathFrameGenerationCalculator
-where
-    T: Grid,
-{
-    fn next_generation(&self, grid: &T) -> Vec<Change> {
+impl GenerationCalculator for DeathFrameGenerationCalculator {
+    fn next_generation(&self, grid: &Box<Grid>) -> Vec<Change> {
         let mut changes = Vec::new();
         for y in 0..grid.height() {
             for x in 0..grid.width() {
@@ -43,7 +40,7 @@ where
     }
 }
 
-fn count_neighbours_at<T: Grid>(grid: &T, x: usize, y: usize) -> Option<usize> {
+fn count_neighbours_at(grid: &Box<Grid>, x: usize, y: usize) -> Option<usize> {
     if x >= grid.width() || y >= grid.height() {
         return None;
     }
@@ -89,7 +86,7 @@ mod death_framed_generation_calculator_test {
     #[test]
     fn dead_grid_stays_dead() {
         let generation_calculator = DeathFrameGenerationCalculator {};
-        let dead_grid = OneDimensionalBoolGrid::new(5, 4);
+        let dead_grid: Box<Grid> = Box::new(OneDimensionalBoolGrid::new(5, 4));
         let changes = generation_calculator.next_generation(&dead_grid);
 
         assert_eq!(0, changes.len());
@@ -98,7 +95,7 @@ mod death_framed_generation_calculator_test {
     #[test]
     fn lone_alive_cell_dies() {
         let generation_calculator = DeathFrameGenerationCalculator {};
-        let mut grid = OneDimensionalBoolGrid::new(3, 3);
+        let mut grid: Box<Grid> = Box::new(OneDimensionalBoolGrid::new(3, 3));
         grid.set_alive_at(1, 1);
         let changes = generation_calculator.next_generation(&grid);
 
@@ -114,7 +111,7 @@ mod death_framed_generation_calculator_test {
     #[test]
     fn alive_cell_in_corner_dies() {
         let generation_calculator = DeathFrameGenerationCalculator {};
-        let mut grid = OneDimensionalBoolGrid::new(3, 3);
+        let mut grid: Box<Grid> = Box::new(OneDimensionalBoolGrid::new(3, 3));
         grid.set_alive_at(0, 0);
         let changes = generation_calculator.next_generation(&grid);
 
@@ -130,7 +127,7 @@ mod death_framed_generation_calculator_test {
     #[test]
     fn alive_cell_in_corner_with_single_neighbour_dies() {
         let generation_calculator = DeathFrameGenerationCalculator {};
-        let mut grid = OneDimensionalBoolGrid::new(3, 3);
+        let mut grid: Box<Grid> = Box::new(OneDimensionalBoolGrid::new(3, 3));
         grid.set_alive_at(0, 0);
         grid.set_alive_at(1, 1);
         let changes = generation_calculator.next_generation(&grid);
@@ -153,7 +150,7 @@ mod death_framed_generation_calculator_test {
     #[test]
     fn dead_cell_with_three_neighbours_resurrects() {
         let generation_calculator = DeathFrameGenerationCalculator {};
-        let mut grid = OneDimensionalBoolGrid::new(3, 3);
+        let mut grid: Box<Grid> = Box::new(OneDimensionalBoolGrid::new(3, 3));
         /*
          * O | . | .
          * O | O | .
@@ -176,7 +173,7 @@ mod death_framed_generation_calculator_test {
     #[test]
     fn alive_cell_with_four_neighbours_dies() {
         let generation_calculator = DeathFrameGenerationCalculator {};
-        let mut grid = OneDimensionalBoolGrid::new(3, 2);
+        let mut grid: Box<Grid> = Box::new(OneDimensionalBoolGrid::new(3, 2));
         /*
          * . | O | O
          * O | O | O
@@ -212,7 +209,7 @@ mod death_framed_generation_calculator_test {
     #[test]
     fn dead_cell_with_four_neighbours_stays_dead() {
         let generation_calculator = DeathFrameGenerationCalculator {};
-        let mut grid = OneDimensionalBoolGrid::new(3, 2);
+        let mut grid: Box<Grid> = Box::new(OneDimensionalBoolGrid::new(3, 2));
         /*
          * O | O | O
          * O | . | O
@@ -230,7 +227,7 @@ mod death_framed_generation_calculator_test {
     #[test]
     fn block_stays_block() {
         let generation_calculator = DeathFrameGenerationCalculator {};
-        let mut grid = OneDimensionalBoolGrid::new(4, 4);
+        let mut grid: Box<Grid> = Box::new(OneDimensionalBoolGrid::new(4, 4));
         /*
          * . | . | . | .
          * . | O | O | .
@@ -248,7 +245,7 @@ mod death_framed_generation_calculator_test {
     #[test]
     fn blinker_period_one_becomes_period_two() {
         let generation_calculator = DeathFrameGenerationCalculator {};
-        let mut grid = OneDimensionalBoolGrid::new(3, 3);
+        let mut grid: Box<Grid> = Box::new(OneDimensionalBoolGrid::new(3, 3));
         /*
          * . | . | .
          * O | O | O
@@ -294,7 +291,7 @@ mod death_framed_generation_calculator_test {
     #[test]
     fn blinker_period_two_becomes_period_one() {
         let generation_calculator = DeathFrameGenerationCalculator {};
-        let mut grid = OneDimensionalBoolGrid::new(3, 3);
+        let mut grid: Box<Grid> = Box::new(OneDimensionalBoolGrid::new(3, 3));
         /*
          * . | O | .
          * . | O | .
