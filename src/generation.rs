@@ -2,9 +2,9 @@ use crate::grid::Grid;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Change {
-    x: usize,
-    y: usize,
-    is_alive: bool,
+    pub x: usize,
+    pub y: usize,
+    pub is_alive: bool,
 }
 
 pub trait GenerationCalculator {
