@@ -2,6 +2,7 @@ use generation::{Change, GenerationCalculator};
 use grid::Grid;
 use std::rc::{Rc, Weak};
 use std::cell::RefCell;
+use crate::constant;
 
 pub trait Presenter {
     fn register_controller(&mut self, controller: Weak<RefCell<Controller>>);
@@ -118,14 +119,19 @@ mod controller_impl_test {
         }
     }
 
-    fn create_controller() -> Rc<RefCell<Controller>> {
+    fn create_controller() -> Rc<RefCell<ControllerImpl>> {
         let presenter = Box::new(MockPresenter::new());
         let generation_calculator = Box::new(MockGenerationCalculator::new());
         ControllerImpl::new(presenter, generation_calculator)
     }
 
-    fn test_inits_board() {
+    #[test]
+    fn inits_presenter_with_constants() {
         let controller = create_controller();
-        controller.borrow_mut().start();
+        let mut controller = controller.borrow_mut();
+        controller.start();
+        let presenter = &controller.presenter.downcast::<MockPresenter>().unwrap();
+        assert_eq!(constant::BOARD_WIDTH, presenter.width);
+        assert_eq!(constant::BOARD_HEIGHT, presenter.height);
     }
 }
