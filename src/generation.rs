@@ -27,7 +27,7 @@ impl DeathFrameGenerationCalculator {
         DeathFrameGenerationCalculator
     }
 
-    fn next_generation(&self, grid: &Grid) -> Vec<Change> {
+    fn next_generation(&self, grid: &dyn Grid) -> Vec<Change> {
         let mut changes = Vec::new();
         for y in 0..grid.height() {
             for x in 0..grid.width() {
@@ -52,7 +52,7 @@ impl DeathFrameGenerationCalculator {
     }
 }
 
-fn count_neighbours_at(grid: &Grid, x: usize, y: usize) -> Option<usize> {
+fn count_neighbours_at(grid: &dyn Grid, x: usize, y: usize) -> Option<usize> {
     if x >= grid.width() || y >= grid.height() {
         return None;
     }
