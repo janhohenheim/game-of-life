@@ -3,7 +3,12 @@ use grid::Grid;
 use std::rc::{Rc, Weak};
 use std::cell::RefCell;
 use crate::constant;
+#[cfg(test)]
+extern crate mockers;
+#[cfg(test)]
+use mockers_derive::mocked;
 
+#[cfg_attr(test, mocked)]
 pub trait Presenter {
     fn register_controller(&mut self, controller: Weak<RefCell<Controller>>);
     fn init_board(&mut self, width: u32, height: u32);
@@ -44,94 +49,37 @@ impl ControllerImpl {
 }
 
 impl Controller for ControllerImpl {
-    fn start(&mut self) {}
+    fn start(&mut self) {
+        self.presenter
+            .init_board(constant::BOARD_WIDTH, constant::BOARD_HEIGHT)
+    }
     fn react_to_event(&mut self, event: PresenterEvent) {}
 }
 
 #[cfg(test)]
 mod controller_impl_test {
     use super::*;
-
-    #[derive(Default)]
-    struct MockPresenter {
-        controller: Option<Weak<RefCell<Controller>>>,
-        width: u32,
-        height: u32,
-        changes: Vec<Change>,
-    }
-
-    impl MockPresenter {
-        fn new() -> Self {
-            Default::default()
-        }
-
-        fn mock_change(&mut self, change: Change) {
-            if let Some(ref controller) = self.controller {
-                if let Some(ref controller) = controller.upgrade() {
-                    let event = PresenterEvent::Change(change);
-                    let mut controller = controller.borrow_mut();
-                    (*controller).react_to_event(event);
-                }
-            }
-        }
-
-        fn mock_next_step(&mut self) {
-            if let Some(ref controller) = self.controller {
-                if let Some(ref controller) = controller.upgrade() {
-                    let event = PresenterEvent::NextStep();
-                    let mut controller = controller.borrow_mut();
-                    (*controller).react_to_event(event);
-                }
-            }
-        }
-    }
-
-    impl Presenter for MockPresenter {
-        fn register_controller(&mut self, controller: Weak<RefCell<Controller>>) {
-            self.controller = Some(controller);
-        }
-
-        fn init_board(&mut self, width: u32, height: u32) {
-            self.width = width;
-            self.height = height;
-        }
-
-        fn present_change(&mut self, change: Change) {
-            self.changes.push(change);
-        }
-    }
-
-    struct MockGenerationCalculator;
-    impl MockGenerationCalculator {
-        fn new() -> Self {
-            MockGenerationCalculator {}
-        }
-    }
-    impl GenerationCalculator for MockGenerationCalculator {
-        fn next_generation(&self, _: &Grid) -> Vec<Change> {
-            vec![
-                Change {
-                    x: 2,
-                    y: 2,
-                    is_alive: true,
-                },
-            ]
-        }
-    }
-
-    fn create_controller() -> Rc<RefCell<ControllerImpl>> {
-        let presenter = Box::new(MockPresenter::new());
-        let generation_calculator = Box::new(MockGenerationCalculator::new());
-        ControllerImpl::new(presenter, generation_calculator)
-    }
+    use mockers::Scenario;
+    use mockers::matchers::ANY;
 
     #[test]
     fn inits_presenter_with_constants() {
-        let controller = create_controller();
+        let scenario = Scenario::new();
+        let presenter = scenario.create_mock_for::<Presenter>();
+        let generation_calculator = scenario.create_mock_for::<GenerationCalculator>();
+
+        scenario.expect(presenter.register_controller_call(ANY).and_return(()));
+        scenario.expect(
+            presenter
+                .init_board_call(constant::BOARD_WIDTH, constant::BOARD_HEIGHT)
+                .and_return(()),
+        );
+
+        let controller = ControllerImpl::new(Box::new(presenter), Box::new(generation_calculator));
         let mut controller = controller.borrow_mut();
         controller.start();
-        let presenter = &controller.presenter.downcast::<MockPresenter>().unwrap();
-        assert_eq!(constant::BOARD_WIDTH, presenter.width);
-        assert_eq!(constant::BOARD_HEIGHT, presenter.height);
+        //let presenter = &controller.presenter.downcast::<MockPresenter>().unwrap();
+        //assert_eq!(constant::BOARD_WIDTH, presenter.width);
+        //assert_eq!(constant::BOARD_HEIGHT, presenter.height);
     }
 }

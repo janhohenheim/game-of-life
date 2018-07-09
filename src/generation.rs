@@ -1,4 +1,8 @@
 use crate::grid::Grid;
+#[cfg(test)]
+extern crate mockers;
+#[cfg(test)]
+use mockers_derive::mocked;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Change {
@@ -7,6 +11,7 @@ pub struct Change {
     pub is_alive: bool,
 }
 
+#[cfg_attr(test, mocked)]
 pub trait GenerationCalculator {
     fn next_generation(&self, grid: &Grid) -> Vec<Change>;
 }
