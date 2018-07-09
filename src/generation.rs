@@ -93,16 +93,35 @@ fn count_neighbours_at(grid: &Grid, x: usize, y: usize) -> Option<usize> {
 #[cfg(test)]
 mod death_framed_generation_calculator_test {
     use super::*;
-    use mockers::Scenario;
     use mockers::matchers::*;
+    use mockers::Scenario;
+
+    fn create_mock_with_size(width: usize, height: usize) -> (Scenario, GridMock) {
+        let scenario = Scenario::new();
+        let grid = scenario.create_mock_for::<Grid>();
+        scenario.expect(grid.width_call().and_return_clone(width).times(..));
+        scenario.expect(grid.height_call().and_return_clone(height).times(..));
+        scenario.expect(
+            grid.is_alive_at_call(ANY, ANY)
+                .and_return_clone(false)
+                .times(..),
+        );
+        (scenario, grid)
+    }
+
+    fn set_grid_alive_at(scenario: &Scenario, grid: &GridMock, alive_cells: &[(usize, usize)]) {
+        for alive_cell in alive_cells {
+            scenario.expect(
+                grid.is_alive_at_call(alive_cell.0, alive_cell.1)
+                    .and_return_clone(true)
+                    .times(..),
+            );
+        }
+    }
 
     #[test]
     fn dead_grid_stays_dead() {
-        let scenario = Scenario::new();
-        let grid = scenario.create_mock_for::<Grid>();
-        scenario.expect(grid.height_call().and_return_clone(5).times(..));
-        scenario.expect(grid.width_call().and_return_clone(4).times(..));
-        scenario.expect(grid.is_alive_at_call(ANY, ANY).and_return_clone(false).times(..));
+        let (_, grid) = create_mock_with_size(5, 4);
 
         let generation_calculator = DeathFrameGenerationCalculator::new();
         let changes = generation_calculator.next_generation(&grid);
@@ -112,12 +131,8 @@ mod death_framed_generation_calculator_test {
 
     #[test]
     fn lone_alive_cell_dies() {
-        let scenario = Scenario::new();
-        let grid = scenario.create_mock_for::<Grid>();
-        scenario.expect(grid.height_call().and_return_clone(3).times(..));
-        scenario.expect(grid.width_call().and_return_clone(3).times(..));
-        scenario.expect(grid.is_alive_at_call(ANY, ANY).and_return_clone(false).times(..));
-        scenario.expect(grid.is_alive_at_call(1, 1).and_return_clone(true).times(..));
+        let (scenario, grid) = create_mock_with_size(5, 4);
+        set_grid_alive_at(&scenario, &grid, &[(1, 1)]);
 
         let generation_calculator = DeathFrameGenerationCalculator::new();
         let changes = generation_calculator.next_generation(&grid);
@@ -133,12 +148,8 @@ mod death_framed_generation_calculator_test {
 
     #[test]
     fn alive_cell_in_corner_dies() {
-        let scenario = Scenario::new();
-        let grid = scenario.create_mock_for::<Grid>();
-        scenario.expect(grid.height_call().and_return_clone(3).times(..));
-        scenario.expect(grid.width_call().and_return_clone(3).times(..));
-        scenario.expect(grid.is_alive_at_call(ANY, ANY).and_return_clone(false).times(..));
-        scenario.expect(grid.is_alive_at_call(0, 0).and_return_clone(true).times(..));
+        let (scenario, grid) = create_mock_with_size(5, 4);
+        set_grid_alive_at(&scenario, &grid, &[(0, 0)]);
 
         let generation_calculator = DeathFrameGenerationCalculator::new();
         let changes = generation_calculator.next_generation(&grid);
@@ -152,13 +163,12 @@ mod death_framed_generation_calculator_test {
         assert_eq!(expected, changes[0]);
     }
 
-/*
     #[test]
     fn alive_cell_in_corner_with_single_neighbour_dies() {
-        let generation_calculator = DeathFrameGenerationCalculator {};
-        let mut grid = OneDimensionalBoolGrid::new(3, 3);
-        grid.set_alive_at(0, 0);
-        grid.set_alive_at(1, 1);
+        let (scenario, grid) = create_mock_with_size(3, 3);
+        set_grid_alive_at(&scenario, &grid, &[(0, 0), (1, 1)]);
+
+        let generation_calculator = DeathFrameGenerationCalculator::new();
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(2, changes.len());
@@ -178,16 +188,15 @@ mod death_framed_generation_calculator_test {
 
     #[test]
     fn dead_cell_with_three_neighbours_resurrects() {
-        let generation_calculator = DeathFrameGenerationCalculator {};
-        let mut grid = OneDimensionalBoolGrid::new(3, 3);
+        let (scenario, grid) = create_mock_with_size(3, 3);;
         /*
          * O | . | .
          * O | O | .
          * . | . | .
          */
-        grid.set_alive_at(0, 0);
-        grid.set_alive_at(0, 1);
-        grid.set_alive_at(1, 1);
+        set_grid_alive_at(&scenario, &grid, &[(0, 0), (0, 1), (1, 1)]);
+
+        let generation_calculator = DeathFrameGenerationCalculator {};
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(1, changes.len());
@@ -201,17 +210,14 @@ mod death_framed_generation_calculator_test {
 
     #[test]
     fn alive_cell_with_four_neighbours_dies() {
-        let generation_calculator = DeathFrameGenerationCalculator {};
-        let mut grid = OneDimensionalBoolGrid::new(3, 2);
+        let (scenario, grid) = create_mock_with_size(3, 2);;
         /*
          * . | O | O
          * O | O | O
          */
-        grid.set_alive_at(1, 0);
-        grid.set_alive_at(2, 0);
-        grid.set_alive_at(0, 1);
-        grid.set_alive_at(1, 1);
-        grid.set_alive_at(2, 1);
+        set_grid_alive_at(&scenario, &grid, &[(1, 0), (2, 0), (0, 1), (1, 1), (2, 1)]);
+
+        let generation_calculator = DeathFrameGenerationCalculator {};
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(3, changes.len());
@@ -237,17 +243,14 @@ mod death_framed_generation_calculator_test {
 
     #[test]
     fn dead_cell_with_four_neighbours_stays_dead() {
-        let generation_calculator = DeathFrameGenerationCalculator {};
-        let mut grid = OneDimensionalBoolGrid::new(3, 2);
+        let (scenario, grid) = create_mock_with_size(3, 2);;
         /*
          * O | O | O
          * O | . | O
          */
-        grid.set_alive_at(0, 0);
-        grid.set_alive_at(1, 0);
-        grid.set_alive_at(2, 0);
-        grid.set_alive_at(0, 1);
-        grid.set_alive_at(2, 1);
+        set_grid_alive_at(&scenario, &grid, &[(0, 0), (1, 0), (2, 0), (0, 1), (2, 1)]);
+
+        let generation_calculator = DeathFrameGenerationCalculator {};
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(1, changes.len());
@@ -255,34 +258,32 @@ mod death_framed_generation_calculator_test {
 
     #[test]
     fn block_stays_block() {
-        let generation_calculator = DeathFrameGenerationCalculator {};
-        let mut grid = OneDimensionalBoolGrid::new(4, 4);
+        let (scenario, grid) = create_mock_with_size(4, 4);;
         /*
          * . | . | . | .
          * . | O | O | .
          * . | O | O | .
          * . | . | . | .
          */
-        grid.set_alive_at(1, 1);
-        grid.set_alive_at(1, 2);
-        grid.set_alive_at(2, 1);
-        grid.set_alive_at(2, 2);
+        set_grid_alive_at(&scenario, &grid, &[(1, 1), (1, 2), (2, 1), (2, 2)]);
+
+        let generation_calculator = DeathFrameGenerationCalculator {};
         let changes = generation_calculator.next_generation(&grid);
+
         assert_eq!(0, changes.len());
     }
 
     #[test]
     fn blinker_period_one_becomes_period_two() {
-        let generation_calculator = DeathFrameGenerationCalculator {};
-        let mut grid = OneDimensionalBoolGrid::new(3, 3);
+        let (scenario, grid) = create_mock_with_size(3, 3);;
         /*
          * . | . | .
          * O | O | O
          * . | . | .
          */
-        grid.set_alive_at(0, 1);
-        grid.set_alive_at(1, 1);
-        grid.set_alive_at(2, 1);
+        set_grid_alive_at(&scenario, &grid, &[(0, 1), (1, 1), (2, 1)]);
+
+        let generation_calculator = DeathFrameGenerationCalculator {};
         let changes = generation_calculator.next_generation(&grid);
 
         /*
@@ -319,16 +320,15 @@ mod death_framed_generation_calculator_test {
 
     #[test]
     fn blinker_period_two_becomes_period_one() {
-        let generation_calculator = DeathFrameGenerationCalculator {};
-        let mut grid = OneDimensionalBoolGrid::new(3, 3);
+        let (scenario, grid) = create_mock_with_size(3, 3);;
         /*
          * . | O | .
          * . | O | .
          * . | O | .
          */
-        grid.set_alive_at(1, 0);
-        grid.set_alive_at(1, 1);
-        grid.set_alive_at(1, 2);
+        set_grid_alive_at(&scenario, &grid, &[(1, 0), (1, 1), (1, 2)]);
+
+        let generation_calculator = DeathFrameGenerationCalculator {};
         let changes = generation_calculator.next_generation(&grid);
 
         /*
@@ -362,5 +362,4 @@ mod death_framed_generation_calculator_test {
         };
         assert_eq!(expected, changes[3]);
     }
-    */
 }
