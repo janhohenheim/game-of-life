@@ -90,8 +90,5 @@ mod controller_impl_test {
         let controller = ControllerImpl::new(Box::new(presenter), Box::new(generation_calculator));
         let mut controller = controller.borrow_mut();
         controller.start();
-        //let presenter = &controller.presenter.downcast::<MockPresenter>().unwrap();
-        //assert_eq!(constant::BOARD_WIDTH, presenter.width);
-        //assert_eq!(constant::BOARD_HEIGHT, presenter.height);
     }
 }
