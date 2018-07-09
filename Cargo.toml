@@ -1,7 +1,9 @@
+#cargo-features = ["edition"]
 [package]
 authors = ["Jan Nils Ferner <jn_ferner@hotmail.de>"]
 name = "game_of_life"
 version = "0.1.0"
+#edition = "2018"
 
 [lib]
 crate-type = ["cdylib"]

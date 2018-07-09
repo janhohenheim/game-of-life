@@ -108,7 +108,7 @@ mod controller_impl_test {
         }
     }
     impl GenerationCalculator for MockGenerationCalculator {
-        fn next_generation(&self, grid: &Box<Grid>) -> Vec<Change> {
+        fn next_generation(&self, _: &Grid) -> Vec<Change> {
             vec![
                 Change {
                     x: 2,
