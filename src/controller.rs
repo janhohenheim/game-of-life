@@ -12,7 +12,7 @@ use mockers_derive::mocked;
 pub trait Presenter {
     fn register_controller(&mut self, controller: Weak<RefCell<Controller>>);
     fn init_board(&mut self, width: u32, height: u32);
-    fn present_change(&mut self, change: Change);
+    fn present_changes(&mut self, changes: Vec<Change>);
 }
 
 #[cfg_attr(test, mocked)]
@@ -91,7 +91,7 @@ mod controller_impl_test {
     }
 
     #[test]
-    fn does_not_present_no_changes() {
+    fn does_not_present_stable_generation() {
         let (scenario, presenter, generation_calculator) = create_mock();
 
         scenario.expect(
@@ -104,5 +104,41 @@ mod controller_impl_test {
         let mut controller = controller.borrow_mut();
 
         controller.start();
+        controller.react_to_event(PresenterEvent::NextStep());
+    }
+
+    #[test]
+    fn presents_next_generation() {
+        let (scenario, presenter, generation_calculator) = create_mock();
+
+        let changes = vec![
+            Change {
+                x: 20,
+                y: 30,
+                is_alive: false,
+            },
+            Change {
+                x: 123,
+                y: 432,
+                is_alive: true,
+            },
+            Change {
+                x: 223,
+                y: 42,
+                is_alive: true,
+            },
+        ];
+        scenario.expect(
+            generation_calculator
+                .next_generation_call(ANY)
+                .and_return(changes.clone()),
+        );
+        scenario.expect(presenter.present_changes_call(changes).and_return(()));
+
+        let controller = Controller::new(Box::new(presenter), Box::new(generation_calculator));
+        let mut controller = controller.borrow_mut();
+
+        controller.start();
+        controller.react_to_event(PresenterEvent::NextStep());
     }
 }

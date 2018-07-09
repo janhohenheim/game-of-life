@@ -3,7 +3,7 @@ extern crate mockers;
 #[cfg(test)]
 use mockers_derive::mocked;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Change {
     pub x: usize,
     pub y: usize,
