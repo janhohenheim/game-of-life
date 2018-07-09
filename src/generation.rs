@@ -188,7 +188,7 @@ mod death_framed_generation_calculator_test {
 
     #[test]
     fn dead_cell_with_three_neighbours_resurrects() {
-        let (scenario, grid) = create_mock_with_size(3, 3);;
+        let (scenario, grid) = create_mock_with_size(3, 3);
         /*
          * O | . | .
          * O | O | .
@@ -210,7 +210,7 @@ mod death_framed_generation_calculator_test {
 
     #[test]
     fn alive_cell_with_four_neighbours_dies() {
-        let (scenario, grid) = create_mock_with_size(3, 2);;
+        let (scenario, grid) = create_mock_with_size(3, 2);
         /*
          * . | O | O
          * O | O | O
@@ -243,7 +243,7 @@ mod death_framed_generation_calculator_test {
 
     #[test]
     fn dead_cell_with_four_neighbours_stays_dead() {
-        let (scenario, grid) = create_mock_with_size(3, 2);;
+        let (scenario, grid) = create_mock_with_size(3, 2);
         /*
          * O | O | O
          * O | . | O
@@ -258,7 +258,7 @@ mod death_framed_generation_calculator_test {
 
     #[test]
     fn block_stays_block() {
-        let (scenario, grid) = create_mock_with_size(4, 4);;
+        let (scenario, grid) = create_mock_with_size(4, 4);
         /*
          * . | . | . | .
          * . | O | O | .
@@ -275,7 +275,7 @@ mod death_framed_generation_calculator_test {
 
     #[test]
     fn blinker_period_one_becomes_period_two() {
-        let (scenario, grid) = create_mock_with_size(3, 3);;
+        let (scenario, grid) = create_mock_with_size(3, 3);
         /*
          * . | . | .
          * O | O | O
@@ -320,7 +320,7 @@ mod death_framed_generation_calculator_test {
 
     #[test]
     fn blinker_period_two_becomes_period_one() {
-        let (scenario, grid) = create_mock_with_size(3, 3);;
+        let (scenario, grid) = create_mock_with_size(3, 3);
         /*
          * . | O | .
          * . | O | .

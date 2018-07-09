@@ -1,10 +1,10 @@
 use crate::constant;
-use generation::Change;
+use crate::generation::Change;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 #[cfg(test)]
 extern crate mockers;
-use generation::Grid;
+use crate::generation::Grid;
 #[cfg(test)]
 use mockers_derive::mocked;
 

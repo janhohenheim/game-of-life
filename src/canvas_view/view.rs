@@ -1,8 +1,8 @@
 extern crate wasm_bindgen;
 use wasm_bindgen::prelude::*;
 
-use crate::constant;
 use super::js;
+use crate::constant;
 
 #[wasm_bindgen]
 pub fn init_board(context: &js::CanvasRenderingContext2D) {
