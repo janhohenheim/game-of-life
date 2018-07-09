@@ -1,12 +1,12 @@
-use generation::Change;
-use std::rc::{Rc, Weak};
-use std::cell::RefCell;
 use crate::constant;
+use generation::Change;
+use std::cell::RefCell;
+use std::rc::{Rc, Weak};
 #[cfg(test)]
 extern crate mockers;
+use generation::Grid;
 #[cfg(test)]
 use mockers_derive::mocked;
-use generation::Grid;
 
 #[cfg_attr(test, mocked)]
 pub trait Presenter {
@@ -64,16 +64,23 @@ impl Controller for ControllerImpl {
 #[cfg(test)]
 mod controller_impl_test {
     use super::*;
-    use mockers::Scenario;
     use mockers::matchers::ANY;
+    use mockers::Scenario;
 
-    #[test]
-    fn inits_presenter_with_constants() {
+    fn create_mock() -> (Scenario, PresenterMock, GenerationCalculatorMock) {
         let scenario = Scenario::new();
         let presenter = scenario.create_mock_for::<Presenter>();
         let generation_calculator = scenario.create_mock_for::<GenerationCalculator>();
 
         scenario.expect(presenter.register_controller_call(ANY).and_return(()));
+
+        (scenario, presenter, generation_calculator)
+    }
+
+    #[test]
+    fn inits_presenter_with_constants() {
+        let (scenario, presenter, generation_calculator) = create_mock();
+
         scenario.expect(
             presenter
                 .init_board_call(constant::BOARD_WIDTH, constant::BOARD_HEIGHT)
