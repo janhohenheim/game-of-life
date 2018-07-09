@@ -93,7 +93,6 @@ fn count_neighbours_at(grid: &Grid, x: usize, y: usize) -> Option<usize> {
 #[cfg(test)]
 mod death_framed_generation_calculator_test {
     use super::*;
-    use crate::grid::OneDimensionalBoolGrid;
     use mockers::Scenario;
     use mockers::matchers::*;
 
@@ -110,12 +109,17 @@ mod death_framed_generation_calculator_test {
 
         assert_eq!(0, changes.len());
     }
-/*
+
     #[test]
     fn lone_alive_cell_dies() {
-        let generation_calculator = DeathFrameGenerationCalculator {};
-        let mut grid = OneDimensionalBoolGrid::new(3, 3);
-        grid.set_alive_at(1, 1);
+        let scenario = Scenario::new();
+        let grid = scenario.create_mock_for::<Grid>();
+        scenario.expect(grid.height_call().and_return_clone(3).times(..));
+        scenario.expect(grid.width_call().and_return_clone(3).times(..));
+        scenario.expect(grid.is_alive_at_call(ANY, ANY).and_return_clone(false).times(..));
+        scenario.expect(grid.is_alive_at_call(1, 1).and_return_clone(true).times(..));
+
+        let generation_calculator = DeathFrameGenerationCalculator::new();
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(1, changes.len());
@@ -129,9 +133,14 @@ mod death_framed_generation_calculator_test {
 
     #[test]
     fn alive_cell_in_corner_dies() {
-        let generation_calculator = DeathFrameGenerationCalculator {};
-        let mut grid = OneDimensionalBoolGrid::new(3, 3);
-        grid.set_alive_at(0, 0);
+        let scenario = Scenario::new();
+        let grid = scenario.create_mock_for::<Grid>();
+        scenario.expect(grid.height_call().and_return_clone(3).times(..));
+        scenario.expect(grid.width_call().and_return_clone(3).times(..));
+        scenario.expect(grid.is_alive_at_call(ANY, ANY).and_return_clone(false).times(..));
+        scenario.expect(grid.is_alive_at_call(0, 0).and_return_clone(true).times(..));
+
+        let generation_calculator = DeathFrameGenerationCalculator::new();
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(1, changes.len());
@@ -143,6 +152,7 @@ mod death_framed_generation_calculator_test {
         assert_eq!(expected, changes[0]);
     }
 
+/*
     #[test]
     fn alive_cell_in_corner_with_single_neighbour_dies() {
         let generation_calculator = DeathFrameGenerationCalculator {};
