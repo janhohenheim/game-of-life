@@ -27,7 +27,7 @@ pub enum PresenterEvent {
 
 pub struct Controller {
     pub presenter: Box<Presenter>,
-    pub generation_calculator: Box<GenerationCalculator>,
+    generation_calculator: Box<GenerationCalculator>,
 }
 
 impl Controller {
@@ -52,7 +52,12 @@ impl Controller {
             .init_board(constant::BOARD_WIDTH, constant::BOARD_HEIGHT)
     }
 
-    pub fn react_to_event(&mut self, event: PresenterEvent) {}
+    pub fn react_to_event(&mut self, event: PresenterEvent) {
+        match event {
+            PresenterEvent::NextStep() => {}
+            PresenterEvent::Change(change) => {}
+        }
+    }
 }
 
 #[cfg(test)]
@@ -67,6 +72,11 @@ mod controller_impl_test {
         let generation_calculator = scenario.create_mock_for::<GenerationCalculator>();
 
         scenario.expect(presenter.register_controller_call(ANY).and_return(()));
+        scenario.expect(
+            presenter
+                .init_board_call(constant::BOARD_WIDTH, constant::BOARD_HEIGHT)
+                .and_return(()),
+        );
 
         (scenario, presenter, generation_calculator)
     }
@@ -75,15 +85,24 @@ mod controller_impl_test {
     fn inits_presenter_with_constants() {
         let (scenario, presenter, generation_calculator) = create_mock();
 
-        scenario.expect(
-            presenter
-                .init_board_call(constant::BOARD_WIDTH, constant::BOARD_HEIGHT)
-                .and_return(()),
-        );
-
         let controller = Controller::new(Box::new(presenter), Box::new(generation_calculator));
         let mut controller = controller.borrow_mut();
         controller.start();
     }
 
+    #[test]
+    fn does_not_present_no_changes() {
+        let (scenario, presenter, generation_calculator) = create_mock();
+
+        scenario.expect(
+            generation_calculator
+                .next_generation_call(ANY)
+                .and_return(Vec::new()),
+        );
+
+        let controller = Controller::new(Box::new(presenter), Box::new(generation_calculator));
+        let mut controller = controller.borrow_mut();
+
+        controller.start();
+    }
 }
