@@ -1,13 +1,5 @@
 use std::ops::Deref;
 
-pub trait Grid {
-    fn width(&self) -> usize;
-    fn height(&self) -> usize;
-    fn is_alive_at(&self, x: usize, y: usize) -> bool;
-    fn set_alive_at(&mut self, x: usize, y: usize);
-    fn set_dead_at(&mut self, x: usize, y: usize);
-}
-
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct OneDimensionalBoolGrid {
     grid: Vec<bool>,
@@ -27,9 +19,7 @@ impl OneDimensionalBoolGrid {
     fn translate_coordinates_to_index(&self, x: usize, y: usize) -> usize {
         self.width() * y + x
     }
-}
 
-impl Grid for OneDimensionalBoolGrid {
     fn width(&self) -> usize {
         self.width
     }
@@ -60,7 +50,7 @@ impl Deref for OneDimensionalBoolGrid {
 
 #[cfg(test)]
 mod one_dimensional_bool_grid_test {
-    use super::{Grid, OneDimensionalBoolGrid};
+    use super::OneDimensionalBoolGrid;
 
     #[test]
     fn grid_has_correct_width() {

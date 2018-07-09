@@ -1,5 +1,4 @@
-use generation::{Change, GenerationCalculator};
-use grid::Grid;
+use generation::Change;
 use std::rc::{Rc, Weak};
 use std::cell::RefCell;
 use crate::constant;
@@ -7,12 +6,18 @@ use crate::constant;
 extern crate mockers;
 #[cfg(test)]
 use mockers_derive::mocked;
+use generation::Grid;
 
 #[cfg_attr(test, mocked)]
 pub trait Presenter {
     fn register_controller(&mut self, controller: Weak<RefCell<Controller>>);
     fn init_board(&mut self, width: u32, height: u32);
     fn present_change(&mut self, change: Change);
+}
+
+#[cfg_attr(test, mocked)]
+pub trait GenerationCalculator {
+    fn next_generation(&self, grid: &Grid) -> Vec<Change>;
 }
 
 pub enum PresenterEvent {
