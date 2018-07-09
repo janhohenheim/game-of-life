@@ -25,22 +25,17 @@ pub enum PresenterEvent {
     NextStep(),
 }
 
-pub trait Controller {
-    fn start(&mut self);
-    fn react_to_event(&mut self, event: PresenterEvent);
-}
-
-pub struct ControllerImpl {
+pub struct Controller {
     pub presenter: Box<Presenter>,
     pub generation_calculator: Box<GenerationCalculator>,
 }
 
-impl ControllerImpl {
-    fn new(
+impl Controller {
+    pub fn new(
         presenter: Box<Presenter>,
         generation_calculator: Box<GenerationCalculator>,
     ) -> Rc<RefCell<Self>> {
-        let controller = Rc::new(RefCell::new(ControllerImpl {
+        let controller = Rc::new(RefCell::new(Controller {
             presenter,
             generation_calculator,
         }));
@@ -51,14 +46,13 @@ impl ControllerImpl {
             .register_controller(second);
         controller
     }
-}
 
-impl Controller for ControllerImpl {
-    fn start(&mut self) {
+    pub fn start(&mut self) {
         self.presenter
             .init_board(constant::BOARD_WIDTH, constant::BOARD_HEIGHT)
     }
-    fn react_to_event(&mut self, event: PresenterEvent) {}
+
+    pub fn react_to_event(&mut self, event: PresenterEvent) {}
 }
 
 #[cfg(test)]
@@ -87,8 +81,9 @@ mod controller_impl_test {
                 .and_return(()),
         );
 
-        let controller = ControllerImpl::new(Box::new(presenter), Box::new(generation_calculator));
+        let controller = Controller::new(Box::new(presenter), Box::new(generation_calculator));
         let mut controller = controller.borrow_mut();
         controller.start();
     }
+
 }
