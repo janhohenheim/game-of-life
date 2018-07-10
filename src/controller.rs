@@ -1,10 +1,10 @@
 use crate::constant;
-use crate::generation::Change;
+use crate::generation_calculator::Change;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 #[cfg(test)]
 extern crate mockers;
-use crate::generation::Grid;
+use crate::generation_calculator::Grid;
 #[cfg(test)]
 use mockers_derive::mocked;
 
@@ -84,9 +84,9 @@ impl Controller {
 }
 
 #[cfg(test)]
-mod controller_impl_test {
+mod tests {
     use super::*;
-    use crate::generation::GridMock;
+    use crate::generation_calculator::GridMock;
     use mockers::matchers::ANY;
     use mockers::Scenario;
 

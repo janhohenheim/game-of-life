@@ -1,15 +1,15 @@
 use std::ops::Deref;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
-pub struct OneDimensionalBoolGrid {
+pub struct Grid {
     grid: Vec<bool>,
     width: usize,
     height: usize,
 }
 
-impl OneDimensionalBoolGrid {
+impl Grid {
     pub fn new(width: usize, height: usize) -> Self {
-        OneDimensionalBoolGrid {
+        Grid {
             grid: vec![false; width * height],
             width,
             height,
@@ -40,7 +40,7 @@ impl OneDimensionalBoolGrid {
     }
 }
 
-impl Deref for OneDimensionalBoolGrid {
+impl Deref for Grid {
     type Target = [bool];
 
     fn deref(&self) -> &Self::Target {
@@ -49,24 +49,24 @@ impl Deref for OneDimensionalBoolGrid {
 }
 
 #[cfg(test)]
-mod one_dimensional_bool_grid_test {
-    use super::OneDimensionalBoolGrid;
+mod tests {
+    use super::*;
 
     #[test]
     fn grid_has_correct_width() {
-        let grid = OneDimensionalBoolGrid::new(10, 5);
+        let grid = Grid::new(10, 5);
         assert_eq!(10, grid.width());
     }
 
     #[test]
     fn grid_has_correct_height() {
-        let grid = OneDimensionalBoolGrid::new(10, 5);
+        let grid = Grid::new(10, 5);
         assert_eq!(5, grid.height());
     }
 
     #[test]
     fn grid_inits_dead() {
-        let grid = OneDimensionalBoolGrid::new(10, 10);
+        let grid = Grid::new(10, 10);
         for cell_is_alive in grid.iter() {
             assert_eq!(false, *cell_is_alive)
         }
@@ -74,14 +74,14 @@ mod one_dimensional_bool_grid_test {
 
     #[test]
     fn grid_sets_alive() {
-        let mut grid = OneDimensionalBoolGrid::new(10, 10);
+        let mut grid = Grid::new(10, 10);
         grid.set_alive_at(2, 3);
         assert_eq!(true, grid.is_alive_at(2, 3));
     }
 
     #[test]
     fn grid_sets_dead() {
-        let mut grid = OneDimensionalBoolGrid::new(10, 10);
+        let mut grid = Grid::new(10, 10);
         grid.set_alive_at(2, 3);
         grid.set_dead_at(2, 3);
         assert_eq!(false, grid.is_alive_at(2, 3));

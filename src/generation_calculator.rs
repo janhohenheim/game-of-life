@@ -20,11 +20,11 @@ pub trait Grid {
 }
 
 #[derive(Debug)]
-pub struct DeathFrameGenerationCalculator;
+pub struct GenerationCalculator;
 
-impl DeathFrameGenerationCalculator {
+impl GenerationCalculator {
     fn new() -> Self {
-        DeathFrameGenerationCalculator
+        GenerationCalculator
     }
 
     fn next_generation(&self, grid: &dyn Grid) -> Vec<Change> {
@@ -91,7 +91,7 @@ fn count_neighbours_at(grid: &dyn Grid, x: usize, y: usize) -> Option<usize> {
 }
 
 #[cfg(test)]
-mod death_framed_generation_calculator_test {
+mod tests {
     use super::*;
     use mockers::matchers::*;
     use mockers::Scenario;
@@ -123,7 +123,7 @@ mod death_framed_generation_calculator_test {
     fn dead_grid_stays_dead() {
         let (_, grid) = create_mock_with_size(5, 4);
 
-        let generation_calculator = DeathFrameGenerationCalculator::new();
+        let generation_calculator = GenerationCalculator::new();
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(0, changes.len());
@@ -134,7 +134,7 @@ mod death_framed_generation_calculator_test {
         let (scenario, grid) = create_mock_with_size(5, 4);
         set_grid_alive_at(&scenario, &grid, &[(1, 1)]);
 
-        let generation_calculator = DeathFrameGenerationCalculator::new();
+        let generation_calculator = GenerationCalculator::new();
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(1, changes.len());
@@ -151,7 +151,7 @@ mod death_framed_generation_calculator_test {
         let (scenario, grid) = create_mock_with_size(5, 4);
         set_grid_alive_at(&scenario, &grid, &[(0, 0)]);
 
-        let generation_calculator = DeathFrameGenerationCalculator::new();
+        let generation_calculator = GenerationCalculator::new();
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(1, changes.len());
@@ -168,7 +168,7 @@ mod death_framed_generation_calculator_test {
         let (scenario, grid) = create_mock_with_size(3, 3);
         set_grid_alive_at(&scenario, &grid, &[(0, 0), (1, 1)]);
 
-        let generation_calculator = DeathFrameGenerationCalculator::new();
+        let generation_calculator = GenerationCalculator::new();
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(2, changes.len());
@@ -196,7 +196,7 @@ mod death_framed_generation_calculator_test {
          */
         set_grid_alive_at(&scenario, &grid, &[(0, 0), (0, 1), (1, 1)]);
 
-        let generation_calculator = DeathFrameGenerationCalculator {};
+        let generation_calculator = GenerationCalculator {};
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(1, changes.len());
@@ -217,7 +217,7 @@ mod death_framed_generation_calculator_test {
          */
         set_grid_alive_at(&scenario, &grid, &[(1, 0), (2, 0), (0, 1), (1, 1), (2, 1)]);
 
-        let generation_calculator = DeathFrameGenerationCalculator {};
+        let generation_calculator = GenerationCalculator {};
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(3, changes.len());
@@ -250,7 +250,7 @@ mod death_framed_generation_calculator_test {
          */
         set_grid_alive_at(&scenario, &grid, &[(0, 0), (1, 0), (2, 0), (0, 1), (2, 1)]);
 
-        let generation_calculator = DeathFrameGenerationCalculator {};
+        let generation_calculator = GenerationCalculator {};
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(1, changes.len());
@@ -267,7 +267,7 @@ mod death_framed_generation_calculator_test {
          */
         set_grid_alive_at(&scenario, &grid, &[(1, 1), (1, 2), (2, 1), (2, 2)]);
 
-        let generation_calculator = DeathFrameGenerationCalculator {};
+        let generation_calculator = GenerationCalculator {};
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(0, changes.len());
@@ -283,7 +283,7 @@ mod death_framed_generation_calculator_test {
          */
         set_grid_alive_at(&scenario, &grid, &[(0, 1), (1, 1), (2, 1)]);
 
-        let generation_calculator = DeathFrameGenerationCalculator {};
+        let generation_calculator = GenerationCalculator {};
         let changes = generation_calculator.next_generation(&grid);
 
         /*
@@ -328,7 +328,7 @@ mod death_framed_generation_calculator_test {
          */
         set_grid_alive_at(&scenario, &grid, &[(1, 0), (1, 1), (1, 2)]);
 
-        let generation_calculator = DeathFrameGenerationCalculator {};
+        let generation_calculator = GenerationCalculator {};
         let changes = generation_calculator.next_generation(&grid);
 
         /*
