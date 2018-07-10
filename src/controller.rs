@@ -12,7 +12,7 @@ use mockers_derive::mocked;
 pub trait Presenter {
     fn register_controller(&mut self, controller: Weak<RefCell<Controller>>);
     fn init_board(&mut self, width: u32, height: u32);
-    fn present_changes(&mut self, changes: Vec<Change>);
+    fn present_changes(&mut self, changes: &[Change]);
 }
 
 #[cfg_attr(test, mocked)]
@@ -28,16 +28,19 @@ pub enum PresenterEvent {
 pub struct Controller {
     pub presenter: Box<Presenter>,
     generation_calculator: Box<GenerationCalculator>,
+    grid: Box<Grid>,
 }
 
 impl Controller {
     pub fn new(
         presenter: Box<Presenter>,
         generation_calculator: Box<GenerationCalculator>,
+        grid: Box<Grid>,
     ) -> Rc<RefCell<Self>> {
         let controller = Rc::new(RefCell::new(Controller {
             presenter,
             generation_calculator,
+            grid,
         }));
         let second = Rc::downgrade(&controller);
         controller
@@ -54,22 +57,44 @@ impl Controller {
 
     pub fn react_to_event(&mut self, event: PresenterEvent) {
         match event {
-            PresenterEvent::NextStep() => {}
-            PresenterEvent::Change(change) => {}
+            PresenterEvent::NextStep() => {
+                let changes = self.generation_calculator.next_generation(&*self.grid);
+                if changes.is_empty() {
+                    return;
+                }
+                for change in &changes {
+                    self.apply_change_to_grid(change);
+                }
+                self.presenter.present_changes(&changes);
+            }
+            PresenterEvent::Change(change) => {
+                self.apply_change_to_grid(&change);
+                self.presenter.present_changes(&[change]);
+            }
         }
+    }
+
+    fn apply_change_to_grid(&mut self, change: &Change) {
+        if change.is_alive {
+            self.grid.set_alive_at(change.x, change.y);
+        } else {
+            self.grid.set_dead_at(change.x, change.y);
+        };
     }
 }
 
 #[cfg(test)]
 mod controller_impl_test {
     use super::*;
+    use crate::generation::GridMock;
     use mockers::matchers::ANY;
     use mockers::Scenario;
 
-    fn create_mock() -> (Scenario, PresenterMock, GenerationCalculatorMock) {
+    fn create_mock() -> (Scenario, PresenterMock, GenerationCalculatorMock, GridMock) {
         let scenario = Scenario::new();
         let presenter = scenario.create_mock_for::<Presenter>();
         let generation_calculator = scenario.create_mock_for::<GenerationCalculator>();
+        let grid = scenario.create_mock_for::<Grid>();
 
         scenario.expect(presenter.register_controller_call(ANY).and_return(()));
         scenario.expect(
@@ -78,21 +103,25 @@ mod controller_impl_test {
                 .and_return(()),
         );
 
-        (scenario, presenter, generation_calculator)
+        (scenario, presenter, generation_calculator, grid)
     }
 
     #[test]
     fn inits_presenter_with_constants() {
-        let (scenario, presenter, generation_calculator) = create_mock();
+        let (_scenario, presenter, generation_calculator, grid) = create_mock();
 
-        let controller = Controller::new(Box::new(presenter), Box::new(generation_calculator));
+        let controller = Controller::new(
+            Box::new(presenter),
+            Box::new(generation_calculator),
+            Box::new(grid),
+        );
         let mut controller = controller.borrow_mut();
         controller.start();
     }
 
     #[test]
     fn does_not_present_stable_generation() {
-        let (scenario, presenter, generation_calculator) = create_mock();
+        let (scenario, presenter, generation_calculator, grid) = create_mock();
 
         scenario.expect(
             generation_calculator
@@ -100,7 +129,11 @@ mod controller_impl_test {
                 .and_return(Vec::new()),
         );
 
-        let controller = Controller::new(Box::new(presenter), Box::new(generation_calculator));
+        let controller = Controller::new(
+            Box::new(presenter),
+            Box::new(generation_calculator),
+            Box::new(grid),
+        );
         let mut controller = controller.borrow_mut();
 
         controller.start();
@@ -109,9 +142,9 @@ mod controller_impl_test {
 
     #[test]
     fn presents_next_generation() {
-        let (scenario, presenter, generation_calculator) = create_mock();
+        let (scenario, presenter, generation_calculator, grid) = create_mock();
 
-        let changes = vec![
+        const CHANGES: [Change; 3] = [
             Change {
                 x: 20,
                 y: 30,
@@ -131,11 +164,27 @@ mod controller_impl_test {
         scenario.expect(
             generation_calculator
                 .next_generation_call(ANY)
-                .and_return(changes.clone()),
+                .and_return(CHANGES.to_vec()),
         );
-        scenario.expect(presenter.present_changes_call(changes).and_return(()));
+        scenario.expect(
+            presenter
+                .present_changes_call(CHANGES.as_ref())
+                .and_return(()),
+        );
 
-        let controller = Controller::new(Box::new(presenter), Box::new(generation_calculator));
+        for change in &CHANGES {
+            if change.is_alive {
+                scenario.expect(grid.set_alive_at_call(change.x, change.y).and_return(()))
+            } else {
+                scenario.expect(grid.set_dead_at_call(change.x, change.y).and_return(()))
+            }
+        }
+
+        let controller = Controller::new(
+            Box::new(presenter),
+            Box::new(generation_calculator),
+            Box::new(grid),
+        );
         let mut controller = controller.borrow_mut();
 
         controller.start();
