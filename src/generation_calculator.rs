@@ -91,7 +91,7 @@ fn count_neighbours_at(grid: &dyn Grid, x: usize, y: usize) -> Option<usize> {
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
     use super::*;
     use mockers::matchers::*;
     use mockers::Scenario;

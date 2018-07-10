@@ -13,7 +13,7 @@ extern crate mockers;
 extern crate mockers_derive;
 extern crate wasm_bindgen;
 
-pub mod canvas_view;
+pub mod canvas;
 mod constant;
 mod controller;
 mod generation_calculator;

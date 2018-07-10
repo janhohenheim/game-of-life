@@ -49,7 +49,7 @@ impl Deref for Grid {
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
     use super::*;
 
     #[test]
