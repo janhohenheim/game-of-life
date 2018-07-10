@@ -21,7 +21,7 @@ pub trait GenerationCalculator {
 }
 
 pub enum PresenterEvent {
-    Change(Change),
+    Changes(Vec<Change>),
     NextStep(),
 }
 
@@ -62,24 +62,24 @@ impl Controller {
                 if changes.is_empty() {
                     return;
                 }
-                for change in &changes {
-                    self.apply_change_to_grid(change);
-                }
+                self.apply_changes_to_grid(&changes);
                 self.presenter.present_changes(&changes);
             }
-            PresenterEvent::Change(change) => {
-                self.apply_change_to_grid(&change);
-                self.presenter.present_changes(&[change]);
+            PresenterEvent::Changes(changes) => {
+                self.apply_changes_to_grid(&changes);
+                self.presenter.present_changes(&changes);
             }
         }
     }
 
-    fn apply_change_to_grid(&mut self, change: &Change) {
-        if change.is_alive {
-            self.grid.set_alive_at(change.x, change.y);
-        } else {
-            self.grid.set_dead_at(change.x, change.y);
-        };
+    fn apply_changes_to_grid(&mut self, changes: &[Change]) {
+        for change in changes {
+            if change.is_alive {
+                self.grid.set_alive_at(change.x, change.y);
+            } else {
+                self.grid.set_dead_at(change.x, change.y);
+            };
+        }
     }
 }
 
@@ -89,6 +89,24 @@ mod controller_impl_test {
     use crate::generation::GridMock;
     use mockers::matchers::ANY;
     use mockers::Scenario;
+
+    const CHANGES: [Change; 3] = [
+        Change {
+            x: 20,
+            y: 30,
+            is_alive: false,
+        },
+        Change {
+            x: 123,
+            y: 432,
+            is_alive: true,
+        },
+        Change {
+            x: 223,
+            y: 42,
+            is_alive: true,
+        },
+    ];
 
     fn create_mock() -> (Scenario, PresenterMock, GenerationCalculatorMock, GridMock) {
         let scenario = Scenario::new();
@@ -104,6 +122,16 @@ mod controller_impl_test {
         );
 
         (scenario, presenter, generation_calculator, grid)
+    }
+
+    fn expect_changes_on_grid(scenario: &Scenario, grid: &GridMock) {
+        for change in &CHANGES {
+            if change.is_alive {
+                scenario.expect(grid.set_alive_at_call(change.x, change.y).and_return(()))
+            } else {
+                scenario.expect(grid.set_dead_at_call(change.x, change.y).and_return(()))
+            }
+        }
     }
 
     #[test]
@@ -144,23 +172,6 @@ mod controller_impl_test {
     fn presents_next_generation() {
         let (scenario, presenter, generation_calculator, grid) = create_mock();
 
-        const CHANGES: [Change; 3] = [
-            Change {
-                x: 20,
-                y: 30,
-                is_alive: false,
-            },
-            Change {
-                x: 123,
-                y: 432,
-                is_alive: true,
-            },
-            Change {
-                x: 223,
-                y: 42,
-                is_alive: true,
-            },
-        ];
         scenario.expect(
             generation_calculator
                 .next_generation_call(ANY)
@@ -172,13 +183,7 @@ mod controller_impl_test {
                 .and_return(()),
         );
 
-        for change in &CHANGES {
-            if change.is_alive {
-                scenario.expect(grid.set_alive_at_call(change.x, change.y).and_return(()))
-            } else {
-                scenario.expect(grid.set_dead_at_call(change.x, change.y).and_return(()))
-            }
-        }
+        expect_changes_on_grid(&scenario, &grid);
 
         let controller = Controller::new(
             Box::new(presenter),
@@ -189,5 +194,28 @@ mod controller_impl_test {
 
         controller.start();
         controller.react_to_event(PresenterEvent::NextStep());
+    }
+
+    #[test]
+    fn presents_changes() {
+        let (scenario, presenter, generation_calculator, grid) = create_mock();
+
+        scenario.expect(
+            presenter
+                .present_changes_call(CHANGES.as_ref())
+                .and_return(()),
+        );
+
+        expect_changes_on_grid(&scenario, &grid);
+
+        let controller = Controller::new(
+            Box::new(presenter),
+            Box::new(generation_calculator),
+            Box::new(grid),
+        );
+        let mut controller = controller.borrow_mut();
+
+        controller.start();
+        controller.react_to_event(PresenterEvent::Changes(CHANGES.to_vec()));
     }
 }
