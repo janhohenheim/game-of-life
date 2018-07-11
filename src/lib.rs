@@ -18,3 +18,4 @@ mod constant;
 mod controller;
 mod generation_calculator;
 mod grid;
+mod interactive_game;
