@@ -36,3 +36,37 @@ impl InteractiveGame for InteractiveGameImpl {
         Vec::new()
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::generation_calculator::GridMock;
+    use mockers::Scenario;
+    const CHANGES: [Change; 3] = [
+        Change {
+            x: 20,
+            y: 30,
+            is_alive: false,
+        },
+        Change {
+            x: 123,
+            y: 432,
+            is_alive: true,
+        },
+        Change {
+            x: 223,
+            y: 42,
+            is_alive: true,
+        },
+    ];
+
+    fn expect_changes_on_grid(scenario: &Scenario, grid: &GridMock) {
+        for change in &CHANGES {
+            if change.is_alive {
+                scenario.expect(grid.set_alive_at_call(change.x, change.y).and_return(()))
+            } else {
+                scenario.expect(grid.set_dead_at_call(change.x, change.y).and_return(()))
+            }
+        }
+    }
+}

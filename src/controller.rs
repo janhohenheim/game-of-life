@@ -28,7 +28,7 @@ pub enum PresenterEvent {
 }
 
 pub struct Controller {
-    pub presenter: Box<Presenter>,
+    presenter: Box<Presenter>,
     game: Box<InteractiveGame>,
 }
 
@@ -105,44 +105,22 @@ mod test {
         (scenario, presenter, game)
     }
 
-    fn expect_changes_on_grid(scenario: &Scenario, grid: &GridMock) {
-        for change in &CHANGES {
-            if change.is_alive {
-                scenario.expect(grid.set_alive_at_call(change.x, change.y).and_return(()))
-            } else {
-                scenario.expect(grid.set_dead_at_call(change.x, change.y).and_return(()))
-            }
-        }
-    }
-
     #[test]
     fn inits_presenter_with_constants() {
-        let (_scenario, presenter, generation_calculator, grid) = create_mock();
+        let (_scenario, presenter, game) = create_mock();
 
-        let controller = Controller::new(
-            Box::new(presenter),
-            Box::new(generation_calculator),
-            Box::new(grid),
-        );
+        let controller = Controller::new(Box::new(presenter), Box::new(game));
         let mut controller = controller.borrow_mut();
         controller.start();
     }
 
     #[test]
     fn does_not_present_stable_generation() {
-        let (scenario, presenter, generation_calculator, grid) = create_mock();
+        let (scenario, presenter, game) = create_mock();
 
-        scenario.expect(
-            generation_calculator
-                .next_generation_call(ANY)
-                .and_return(Vec::new()),
-        );
+        scenario.expect(game.next_generation_call().and_return(Vec::new()));
 
-        let controller = Controller::new(
-            Box::new(presenter),
-            Box::new(generation_calculator),
-            Box::new(grid),
-        );
+        let controller = Controller::new(Box::new(presenter), Box::new(game));
         let mut controller = controller.borrow_mut();
 
         controller.start();
@@ -151,26 +129,17 @@ mod test {
 
     #[test]
     fn presents_next_generation() {
-        let (scenario, presenter, generation_calculator, grid) = create_mock();
+        let (scenario, presenter, game) = create_mock();
 
-        scenario.expect(
-            generation_calculator
-                .next_generation_call(ANY)
-                .and_return(CHANGES.to_vec()),
-        );
+        scenario.expect(game.next_generation_call().and_return(CHANGES.to_vec()));
+
         scenario.expect(
             presenter
                 .present_changes_call(CHANGES.as_ref())
                 .and_return(()),
         );
 
-        expect_changes_on_grid(&scenario, &grid);
-
-        let controller = Controller::new(
-            Box::new(presenter),
-            Box::new(generation_calculator),
-            Box::new(grid),
-        );
+        let controller = Controller::new(Box::new(presenter), Box::new(game));
         let mut controller = controller.borrow_mut();
 
         controller.start();
@@ -179,7 +148,9 @@ mod test {
 
     #[test]
     fn presents_changes() {
-        let (scenario, presenter, generation_calculator, grid) = create_mock();
+        let (scenario, presenter, game) = create_mock();
+
+        scenario.expect(game.accept_changes_call(CHANGES.as_ref()).and_return(()));
 
         scenario.expect(
             presenter
@@ -187,13 +158,7 @@ mod test {
                 .and_return(()),
         );
 
-        expect_changes_on_grid(&scenario, &grid);
-
-        let controller = Controller::new(
-            Box::new(presenter),
-            Box::new(generation_calculator),
-            Box::new(grid),
-        );
+        let controller = Controller::new(Box::new(presenter), Box::new(game));
         let mut controller = controller.borrow_mut();
 
         controller.start();

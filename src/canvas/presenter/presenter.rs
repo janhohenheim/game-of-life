@@ -11,4 +11,6 @@ struct Presenter {
 }
 
 #[cfg(test)]
-mod test {}
+mod test {
+    use super::*;
+}
