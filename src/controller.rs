@@ -1,6 +1,7 @@
 use crate::constant;
 use crate::generation_calculator::Change;
 use crate::generation_calculator::Grid;
+use crate::interactive_game::InteractiveGame;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
@@ -28,21 +29,12 @@ pub enum PresenterEvent {
 
 pub struct Controller {
     pub presenter: Box<Presenter>,
-    generation_calculator: Box<GenerationCalculator>,
-    grid: Box<Grid>,
+    game: Box<InteractiveGame>,
 }
 
 impl Controller {
-    pub fn new(
-        presenter: Box<Presenter>,
-        generation_calculator: Box<GenerationCalculator>,
-        grid: Box<Grid>,
-    ) -> Rc<RefCell<Self>> {
-        let controller = Rc::new(RefCell::new(Controller {
-            presenter,
-            generation_calculator,
-            grid,
-        }));
+    pub fn new(presenter: Box<Presenter>, game: Box<InteractiveGame>) -> Rc<RefCell<Self>> {
+        let controller = Rc::new(RefCell::new(Controller { presenter, game }));
         let second = Rc::downgrade(&controller);
         controller
             .borrow_mut()
@@ -59,27 +51,16 @@ impl Controller {
     pub fn react_to_event(&mut self, event: PresenterEvent) {
         match event {
             PresenterEvent::NextStep() => {
-                let changes = self.generation_calculator.next_generation(&*self.grid);
+                let changes = self.game.next_generation();
                 if changes.is_empty() {
                     return;
                 }
-                self.apply_changes_to_grid(&changes);
                 self.presenter.present_changes(&changes);
             }
             PresenterEvent::Changes(changes) => {
-                self.apply_changes_to_grid(&changes);
+                self.game.accept_changes(&changes);
                 self.presenter.present_changes(&changes);
             }
-        }
-    }
-
-    fn apply_changes_to_grid(&mut self, changes: &[Change]) {
-        for change in changes {
-            if change.is_alive {
-                self.grid.set_alive_at(change.x, change.y);
-            } else {
-                self.grid.set_dead_at(change.x, change.y);
-            };
         }
     }
 }
@@ -87,7 +68,7 @@ impl Controller {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::generation_calculator::GridMock;
+    use crate::interactive_game::InteractiveGameMock;
     use mockers::matchers::ANY;
     use mockers::Scenario;
 
@@ -109,11 +90,10 @@ mod test {
         },
     ];
 
-    fn create_mock() -> (Scenario, PresenterMock, GenerationCalculatorMock, GridMock) {
+    fn create_mock() -> (Scenario, PresenterMock, InteractiveGameMock) {
         let scenario = Scenario::new();
         let presenter = scenario.create_mock_for::<Presenter>();
-        let generation_calculator = scenario.create_mock_for::<GenerationCalculator>();
-        let grid = scenario.create_mock_for::<Grid>();
+        let game = scenario.create_mock_for::<InteractiveGame>();
 
         scenario.expect(presenter.register_controller_call(ANY).and_return(()));
         scenario.expect(
@@ -122,7 +102,7 @@ mod test {
                 .and_return(()),
         );
 
-        (scenario, presenter, generation_calculator, grid)
+        (scenario, presenter, game)
     }
 
     fn expect_changes_on_grid(scenario: &Scenario, grid: &GridMock) {

@@ -10,12 +10,13 @@ pub trait GenerationCalculator {
     fn next_generation(&self, grid: &Grid) -> Vec<Change>;
 }
 
-trait InteractiveGame {
+#[cfg_attr(test, mocked)]
+pub trait InteractiveGame {
     fn accept_changes(&mut self, changes: &[Change]);
-    fn next_step(&mut self) -> Vec<Change>;
+    fn next_generation(&mut self) -> Vec<Change>;
 }
 
-struct InteractiveGameImpl {
+pub struct InteractiveGameImpl {
     grid: Box<dyn Grid>,
     generation_calculator: Box<dyn GenerationCalculator>,
 }
@@ -31,7 +32,7 @@ impl InteractiveGameImpl {
 impl InteractiveGame for InteractiveGameImpl {
     fn accept_changes(&mut self, changes: &[Change]) {}
 
-    fn next_step(&mut self) -> Vec<Change> {
+    fn next_generation(&mut self) -> Vec<Change> {
         Vec::new()
     }
 }
