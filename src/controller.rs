@@ -37,16 +37,19 @@ impl Controller {
     pub fn new(presenter: ObservablePresenter, game: Box<InteractiveGame>) -> Rc<RefCell<Self>> {
         let controller = Rc::new(RefCell::new(Controller { presenter, game }));
         let second = Rc::downgrade(&controller);
-        controller
-            .borrow_mut()
-            .presenter
-            .borrow_mut()
-            .register_controller(second);
+        {
+            let controller_guard = controller.borrow_mut();
+            controller_guard
+                .presenter
+                .borrow_mut()
+                .register_controller(second);
+        }
         controller
     }
 
     pub fn start(&mut self) {
         self.presenter
+            .borrow_mut()
             .init_board(constant::BOARD_WIDTH, constant::BOARD_HEIGHT)
     }
 
@@ -57,11 +60,11 @@ impl Controller {
                 if changes.is_empty() {
                     return;
                 }
-                self.presenter.present_changes(&changes);
+                self.presenter.borrow_mut().present_changes(&changes);
             }
             PresenterEvent::Changes(changes) => {
                 self.game.accept_changes(&changes);
-                self.presenter.present_changes(&changes);
+                self.presenter.borrow_mut().present_changes(&changes);
             }
         }
     }
@@ -111,7 +114,7 @@ mod test {
     fn inits_presenter_with_constants() {
         let (_scenario, presenter, game) = create_mock();
 
-        let controller = Controller::new(Box::new(presenter), Box::new(game));
+        let controller = Controller::new(Rc::new(RefCell::new(presenter)), Box::new(game));
         let mut controller = controller.borrow_mut();
         controller.start();
     }
@@ -122,7 +125,7 @@ mod test {
 
         scenario.expect(game.next_generation_call().and_return(Vec::new()));
 
-        let controller = Controller::new(Box::new(presenter), Box::new(game));
+        let controller = Controller::new(Rc::new(RefCell::new(presenter)), Box::new(game));
         let mut controller = controller.borrow_mut();
 
         controller.start();
@@ -141,7 +144,7 @@ mod test {
                 .and_return(()),
         );
 
-        let controller = Controller::new(Box::new(presenter), Box::new(game));
+        let controller = Controller::new(Rc::new(RefCell::new(presenter)), Box::new(game));
         let mut controller = controller.borrow_mut();
 
         controller.start();
@@ -160,7 +163,7 @@ mod test {
                 .and_return(()),
         );
 
-        let controller = Controller::new(Box::new(presenter), Box::new(game));
+        let controller = Controller::new(Rc::new(RefCell::new(presenter)), Box::new(game));
         let mut controller = controller.borrow_mut();
 
         controller.start();
