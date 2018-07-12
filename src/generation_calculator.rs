@@ -19,14 +19,20 @@ pub trait Grid {
     fn set_dead_at(&mut self, x: usize, y: usize);
 }
 
+#[cfg_attr(test, mocked)]
+pub trait GenerationCalculator {
+    fn next_generation(&self, grid: &Grid) -> Vec<Change>;
+}
+
 #[derive(Debug)]
-pub struct GenerationCalculator;
+pub struct GenerationCalculatorImpl;
 
-impl GenerationCalculator {
+impl GenerationCalculatorImpl {
     fn new() -> Self {
-        GenerationCalculator
+        GenerationCalculatorImpl
     }
-
+}
+impl GenerationCalculator for GenerationCalculatorImpl {
     fn next_generation(&self, grid: &dyn Grid) -> Vec<Change> {
         let mut changes = Vec::new();
         for y in 0..grid.height() {
@@ -123,7 +129,7 @@ mod test {
     fn dead_grid_stays_dead() {
         let (_, grid) = create_mock_with_size(5, 4);
 
-        let generation_calculator = GenerationCalculator::new();
+        let generation_calculator = GenerationCalculatorImpl::new();
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(0, changes.len());
@@ -134,7 +140,7 @@ mod test {
         let (scenario, grid) = create_mock_with_size(5, 4);
         set_grid_alive_at(&scenario, &grid, &[(1, 1)]);
 
-        let generation_calculator = GenerationCalculator::new();
+        let generation_calculator = GenerationCalculatorImpl::new();
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(1, changes.len());
@@ -151,7 +157,7 @@ mod test {
         let (scenario, grid) = create_mock_with_size(5, 4);
         set_grid_alive_at(&scenario, &grid, &[(0, 0)]);
 
-        let generation_calculator = GenerationCalculator::new();
+        let generation_calculator = GenerationCalculatorImpl::new();
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(1, changes.len());
@@ -168,7 +174,7 @@ mod test {
         let (scenario, grid) = create_mock_with_size(3, 3);
         set_grid_alive_at(&scenario, &grid, &[(0, 0), (1, 1)]);
 
-        let generation_calculator = GenerationCalculator::new();
+        let generation_calculator = GenerationCalculatorImpl::new();
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(2, changes.len());
@@ -196,7 +202,7 @@ mod test {
          */
         set_grid_alive_at(&scenario, &grid, &[(0, 0), (0, 1), (1, 1)]);
 
-        let generation_calculator = GenerationCalculator {};
+        let generation_calculator = GenerationCalculatorImpl {};
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(1, changes.len());
@@ -217,7 +223,7 @@ mod test {
          */
         set_grid_alive_at(&scenario, &grid, &[(1, 0), (2, 0), (0, 1), (1, 1), (2, 1)]);
 
-        let generation_calculator = GenerationCalculator {};
+        let generation_calculator = GenerationCalculatorImpl {};
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(3, changes.len());
@@ -250,7 +256,7 @@ mod test {
          */
         set_grid_alive_at(&scenario, &grid, &[(0, 0), (1, 0), (2, 0), (0, 1), (2, 1)]);
 
-        let generation_calculator = GenerationCalculator {};
+        let generation_calculator = GenerationCalculatorImpl {};
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(1, changes.len());
@@ -267,7 +273,7 @@ mod test {
          */
         set_grid_alive_at(&scenario, &grid, &[(1, 1), (1, 2), (2, 1), (2, 2)]);
 
-        let generation_calculator = GenerationCalculator {};
+        let generation_calculator = GenerationCalculatorImpl {};
         let changes = generation_calculator.next_generation(&grid);
 
         assert_eq!(0, changes.len());
@@ -283,7 +289,7 @@ mod test {
          */
         set_grid_alive_at(&scenario, &grid, &[(0, 1), (1, 1), (2, 1)]);
 
-        let generation_calculator = GenerationCalculator {};
+        let generation_calculator = GenerationCalculatorImpl {};
         let changes = generation_calculator.next_generation(&grid);
 
         /*
@@ -328,7 +334,7 @@ mod test {
          */
         set_grid_alive_at(&scenario, &grid, &[(1, 0), (1, 1), (1, 2)]);
 
-        let generation_calculator = GenerationCalculator {};
+        let generation_calculator = GenerationCalculatorImpl {};
         let changes = generation_calculator.next_generation(&grid);
 
         /*
