@@ -27,18 +27,20 @@ pub enum PresenterEvent {
     NextStep(),
 }
 
+type ObservablePresenter = Rc<RefCell<Presenter>>;
 pub struct Controller {
-    presenter: Box<Presenter>,
+    presenter: ObservablePresenter,
     game: Box<InteractiveGame>,
 }
 
 impl Controller {
-    pub fn new(presenter: Box<Presenter>, game: Box<InteractiveGame>) -> Rc<RefCell<Self>> {
+    pub fn new(presenter: ObservablePresenter, game: Box<InteractiveGame>) -> Rc<RefCell<Self>> {
         let controller = Rc::new(RefCell::new(Controller { presenter, game }));
         let second = Rc::downgrade(&controller);
         controller
             .borrow_mut()
             .presenter
+            .borrow_mut()
             .register_controller(second);
         controller
     }
