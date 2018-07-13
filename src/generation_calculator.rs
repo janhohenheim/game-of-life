@@ -3,20 +3,13 @@ extern crate mockers;
 #[cfg(test)]
 use mockers_derive::mocked;
 
+use crate::grid::Grid;
+
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Change {
-    pub x: usize,
-    pub y: usize,
+    pub x: u32,
+    pub y: u32,
     pub is_alive: bool,
-}
-
-#[cfg_attr(test, mocked)]
-pub trait Grid {
-    fn width(&self) -> usize;
-    fn height(&self) -> usize;
-    fn is_alive_at(&self, x: usize, y: usize) -> bool;
-    fn set_alive_at(&mut self, x: usize, y: usize);
-    fn set_dead_at(&mut self, x: usize, y: usize);
 }
 
 #[cfg_attr(test, mocked)]
@@ -58,7 +51,7 @@ impl GenerationCalculator for GenerationCalculatorImpl {
     }
 }
 
-fn count_neighbours_at(grid: &dyn Grid, x: usize, y: usize) -> Option<usize> {
+fn count_neighbours_at(grid: &dyn Grid, x: u32, y: u32) -> Option<u32> {
     if x >= grid.width() || y >= grid.height() {
         return None;
     }
@@ -99,10 +92,11 @@ fn count_neighbours_at(grid: &dyn Grid, x: usize, y: usize) -> Option<usize> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::grid::GridMock;
     use mockers::matchers::*;
     use mockers::Scenario;
 
-    fn create_mock_with_size(width: usize, height: usize) -> (Scenario, GridMock) {
+    fn create_mock_with_size(width: u32, height: u32) -> (Scenario, GridMock) {
         let scenario = Scenario::new();
         let grid = scenario.create_mock_for::<Grid>();
         scenario.expect(grid.width_call().and_return_clone(width).times(..));
@@ -115,7 +109,7 @@ mod test {
         (scenario, grid)
     }
 
-    fn set_grid_alive_at(scenario: &Scenario, grid: &GridMock, alive_cells: &[(usize, usize)]) {
+    fn set_grid_alive_at(scenario: &Scenario, grid: &GridMock, alive_cells: &[(u32, u32)]) {
         for alive_cell in alive_cells {
             scenario.expect(
                 grid.is_alive_at_call(alive_cell.0, alive_cell.1)
