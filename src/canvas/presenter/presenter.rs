@@ -1,4 +1,5 @@
 use crate::generation_calculator::Change;
+use crate::grid::Position;
 use crate::interactive_game::Presenter;
 use std::borrow::BorrowMut;
 use std::cell::RefCell;
@@ -24,7 +25,7 @@ impl CanvasPresenter {
     }
 }
 impl Presenter for CanvasPresenter {
-    fn init_board(&mut self, width: u32, height: u32) {}
+    fn init_board(&mut self, width: u32, height: u32, alive_cells: &[Position]) {}
     fn present_changes(&mut self, changes: &[Change]) {}
 }
 

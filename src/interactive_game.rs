@@ -1,5 +1,5 @@
 use crate::generation_calculator::Change;
-use crate::grid::Grid;
+use crate::grid::{Grid, Position};
 
 #[cfg(test)]
 extern crate mockers;
@@ -13,7 +13,7 @@ pub trait GenerationCalculator {
 
 #[cfg_attr(test, mocked)]
 pub trait Presenter {
-    fn init_board(&mut self, width: u32, height: u32);
+    fn init_board(&mut self, width: u32, height: u32, alive_cells: &[Position]);
     fn present_changes(&mut self, changes: &[Change]);
 }
 
@@ -34,7 +34,7 @@ impl InteractiveGameImpl {
         generation_calculator: Box<dyn GenerationCalculator>,
         mut presenter: Box<dyn Presenter>,
     ) -> Self {
-        presenter.init_board(grid.width(), grid.height());
+        presenter.init_board(grid.width(), grid.height(), &Vec::new());
         InteractiveGameImpl {
             grid,
             generation_calculator,
@@ -82,6 +82,8 @@ mod test {
             is_alive: true,
         },
     ];
+    const ALIVE_INITIALIZED_CELLS: [Position; 2] =
+        [Position { x: 300, y: 123 }, Position { x: 111, y: 222 }];
 
     fn create_mock() -> (Scenario, GridMock, GenerationCalculatorMock, PresenterMock) {
         let scenario = Scenario::new();
@@ -92,7 +94,16 @@ mod test {
         const HEIGHT: u32 = 800;
         scenario.expect(grid.width_call().and_return(WIDTH));
         scenario.expect(grid.height_call().and_return(HEIGHT));
-        scenario.expect(presenter.init_board_call(WIDTH, HEIGHT).and_return(()));
+        scenario.expect(grid.is_alive_at_call(ANY).and_return(false));
+        for alive_pos in &ALIVE_INITIALIZED_CELLS {
+            scenario.expect(grid.is_alive_at_call(*alive_pos).and_return(true));
+        }
+
+        scenario.expect(
+            presenter
+                .init_board_call(WIDTH, HEIGHT, ALIVE_INITIALIZED_CELLS.as_ref())
+                .and_return(()),
+        );
 
         (scenario, grid, generation_calculator, presenter)
     }
