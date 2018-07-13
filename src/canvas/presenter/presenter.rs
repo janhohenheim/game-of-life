@@ -63,6 +63,17 @@ mod test {
         (scenario, view)
     }
 
+    fn init_board(scenario: &Scenario, view: &CanvasViewMock) {
+        static EMPTY_INITIALIZED_VIEW_MODEL: CanvasViewModel = CanvasViewModel {
+            lines: Vec::new(), // To do: Add actual values
+            squares: Vec::new(),
+        };
+        scenario.expect(
+            view.init_board_call(WIDTH, HEIGHT, &EMPTY_INITIALIZED_VIEW_MODEL)
+                .and_return(()),
+        );
+    }
+
     #[test]
     #[should_panic]
     fn panics_when_presenting_changes_and_not_initialized() {
@@ -74,16 +85,40 @@ mod test {
     #[test]
     fn inits_empty_board() {
         let (scenario, view) = create_mock();
-        static EMPTY_INITIALIZED_VIEW_MODEL: CanvasViewModel = CanvasViewModel {
-            lines: Vec::new(), // To do: Add actual values
-            squares: Vec::new(),
-        };
-        scenario.expect(
-            view.init_board_call(WIDTH, HEIGHT, &EMPTY_INITIALIZED_VIEW_MODEL)
-                .and_return(()),
-        );
+        init_board(&scenario, &view);
+
         let mut presenter = CanvasPresenter::new(Box::new(view));
         presenter.init_board(WIDTH, HEIGHT, &Vec::new());
     }
 
+    #[test]
+    fn present_changes() {
+        let (scenario, view) = create_mock();
+        init_board(&scenario, &view);
+        static EXPECTED_VIEW_MODEL: CanvasViewModel = CanvasViewModel {
+            lines: Vec::new(), // To do: Add actual values
+            squares: Vec::new(),
+        };
+        scenario.expect(
+            view.draw_view_model_call(&EXPECTED_VIEW_MODEL)
+                .and_return(()),
+        );
+        let mut presenter = CanvasPresenter::new(Box::new(view));
+        presenter.init_board(WIDTH, HEIGHT, &Vec::new());
+        let changes = vec![
+            Change {
+                position: Position { x: 2, y: 3 },
+                is_alive: true,
+            },
+            Change {
+                position: Position { x: 3, y: 4 },
+                is_alive: true,
+            },
+            Change {
+                position: Position { x: 1, y: 1 },
+                is_alive: true,
+            },
+        ];
+        presenter.present_changes(&changes);
+    }
 }
