@@ -2,12 +2,12 @@ extern crate wasm_bindgen;
 use wasm_bindgen::prelude::*;
 
 use super::js;
-use crate::constant;
+use crate::canvas::constant;
 
 #[wasm_bindgen]
 pub fn init_board(context: &js::CanvasRenderingContext2D) {
     context.set_fill_style("aquamarine");
-    context.fill_rect(0, 0, constant::BOARD_WIDTH, constant::BOARD_HEIGHT);
+    context.fill_rect(0, 0, constant::CANVAS_WIDTH, constant::CANVAS_HEIGHT);
     context.set_fill_style("white");
     context.begin_path();
     context.move_to(75, 50);

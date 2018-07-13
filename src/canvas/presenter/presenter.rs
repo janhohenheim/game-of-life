@@ -50,6 +50,7 @@ impl Presenter for CanvasPresenter {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::canvas::constant;
     use crate::interactive_game::InteractiveGameMock;
     use mockers::matchers::ANY;
     use mockers::Scenario;
@@ -64,12 +65,14 @@ mod test {
     }
 
     fn init_board(scenario: &Scenario, view: &CanvasViewMock) {
-        static EMPTY_INITIALIZED_VIEW_MODEL: CanvasViewModel = CanvasViewModel {
-            lines: Vec::new(), // To do: Add actual values
-            squares: Vec::new(),
-        };
+        lazy_static!{
+            static ref EMPTY_INITIALIZED_VIEW_MODEL: CanvasViewModel = CanvasViewModel {
+                lines: vec![], // To do: Add actual values
+                squares: Vec::new(),
+            };
+        }
         scenario.expect(
-            view.init_board_call(WIDTH, HEIGHT, &EMPTY_INITIALIZED_VIEW_MODEL)
+            view.init_board_call(WIDTH, HEIGHT, &*EMPTY_INITIALIZED_VIEW_MODEL)
                 .and_return(()),
         );
     }
@@ -95,12 +98,14 @@ mod test {
     fn present_changes() {
         let (scenario, view) = create_mock();
         init_board(&scenario, &view);
-        static EXPECTED_VIEW_MODEL: CanvasViewModel = CanvasViewModel {
-            lines: Vec::new(), // To do: Add actual values
-            squares: Vec::new(),
-        };
+        lazy_static!{
+            static ref EXPECTED_VIEW_MODEL: CanvasViewModel = CanvasViewModel {
+                lines: Vec::new(), // To do: Add actual values
+                squares: Vec::new(),
+            };
+        }
         scenario.expect(
-            view.draw_view_model_call(&EXPECTED_VIEW_MODEL)
+            view.draw_view_model_call(&*EXPECTED_VIEW_MODEL)
                 .and_return(()),
         );
         let mut presenter = CanvasPresenter::new(Box::new(view));

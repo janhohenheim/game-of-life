@@ -14,8 +14,10 @@ extern crate mockers;
 extern crate mockers_derive;
 extern crate wasm_bindgen;
 
+#[macro_use]
+extern crate lazy_static;
+
 pub mod canvas;
-mod constant;
 mod controller;
 mod generation_calculator;
 mod grid;
