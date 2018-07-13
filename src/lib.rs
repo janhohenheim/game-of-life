@@ -3,7 +3,8 @@
     wasm_custom_section,
     wasm_import_module,
     crate_in_paths,
-    rust_2018_preview
+    rust_2018_preview,
+    const_vec_new
 )]
 
 #[cfg(test)]
