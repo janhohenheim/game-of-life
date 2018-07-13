@@ -122,7 +122,7 @@ mod test {
     #[test]
     fn inits_presenter_with_grid_data() {
         let (_scenario, grid, generation_calculator, presenter) = create_mock();
-        let mut game = InteractiveGameImpl::new(
+        let game = InteractiveGameImpl::new(
             Box::new(grid),
             Box::new(generation_calculator),
             Box::new(presenter),

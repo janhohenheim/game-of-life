@@ -13,9 +13,14 @@ impl Controller {
         Controller { game }
     }
 
-    pub fn on_click(&mut self, x: u32, y: u32) {}
-}
+    pub fn on_click(&mut self, x: u32, y: u32) {
+        unimplemented!()
+    }
 
+    pub fn on_timer(&mut self) {
+        unimplemented!()
+    }
+}
 #[cfg(test)]
 mod test {
     use super::*;

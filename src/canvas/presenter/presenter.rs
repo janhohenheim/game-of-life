@@ -7,14 +7,20 @@ extern crate mockers;
 #[cfg(test)]
 use mockers_derive::mocked;
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
+pub struct CanvasViewModel {
+    lines: Vec<Line>,
+    squares: Vec<Square>,
+}
+
+#[derive(Debug, Eq, PartialEq)]
 pub struct Line {
     from: Position,
     to: Position,
     colour: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct Square {
     width: u32,
     height: u32,
@@ -23,16 +29,16 @@ pub struct Square {
 }
 
 #[cfg_attr(test, mocked)]
-pub trait View {
-    fn init_board(&mut self, width: u32, height: u32, lines: &[Line], squares: &[Square]);
-    fn draw_squares(&mut self, squares: &[Square]);
+pub trait CanvasView {
+    fn init_board(&mut self, width: u32, height: u32, view_model: &CanvasViewModel);
+    fn draw_view_model(&mut self, view_model: &CanvasViewModel);
 }
 
 pub struct CanvasPresenter {
-    view: Box<View>,
+    view: Box<CanvasView>,
 }
 impl CanvasPresenter {
-    pub fn new(view: Box<View>) -> Self {
+    pub fn new(view: Box<CanvasView>) -> Self {
         CanvasPresenter { view }
     }
 }
@@ -48,18 +54,34 @@ mod test {
     use mockers::matchers::ANY;
     use mockers::Scenario;
 
-    const WIDTH: u32 = 1000;
-    const HEIGHT: u32 = 800;
+    const WIDTH: u32 = 10;
+    const HEIGHT: u32 = 8;
 
-    fn create_mock() -> (Scenario, ViewMock) {
+    fn create_mock() -> (Scenario, CanvasViewMock) {
         let scenario = Scenario::new();
-        let view = scenario.create_mock_for::<View>();
+        let view = scenario.create_mock_for::<CanvasView>();
         (scenario, view)
+    }
+
+    #[test]
+    #[should_panic]
+    fn panics_when_presenting_changes_and_not_initialized() {
+        let (_scenario, view) = create_mock();
+        let mut presenter = CanvasPresenter::new(Box::new(view));
+        presenter.present_changes(&Vec::new());
     }
 
     #[test]
     fn inits_empty_board() {
         let (scenario, view) = create_mock();
+        static EMPTY_INITIALIZED_VIEW_MODEL: CanvasViewModel = CanvasViewModel {
+            lines: Vec::new(), // To do: Add actual values
+            squares: Vec::new(),
+        };
+        scenario.expect(
+            view.init_board_call(WIDTH, HEIGHT, &EMPTY_INITIALIZED_VIEW_MODEL)
+                .and_return(()),
+        );
         let mut presenter = CanvasPresenter::new(Box::new(view));
         presenter.init_board(WIDTH, HEIGHT, &Vec::new());
     }
