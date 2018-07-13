@@ -34,7 +34,18 @@ impl InteractiveGameImpl {
         generation_calculator: Box<dyn GenerationCalculator>,
         mut presenter: Box<dyn Presenter>,
     ) -> Self {
-        presenter.init_board(grid.width(), grid.height(), &Vec::new());
+        let width = grid.width();
+        let height = grid.height();
+        let mut alive_cells = Vec::new();
+        for y in 0..height {
+            for x in 0..width {
+                let position = Position { x, y };
+                if grid.is_alive_at(position) {
+                    alive_cells.push(position);
+                }
+            }
+        }
+        presenter.init_board(width, height, &alive_cells);
         InteractiveGameImpl {
             grid,
             generation_calculator,
@@ -94,7 +105,7 @@ mod test {
         const HEIGHT: u32 = 800;
         scenario.expect(grid.width_call().and_return(WIDTH));
         scenario.expect(grid.height_call().and_return(HEIGHT));
-        scenario.expect(grid.is_alive_at_call(ANY).and_return(false));
+        scenario.expect(grid.is_alive_at_call(ANY).and_return_clone(false).times(..));
         for alive_pos in &ALIVE_INITIALIZED_CELLS {
             scenario.expect(grid.is_alive_at_call(*alive_pos).and_return(true));
         }
