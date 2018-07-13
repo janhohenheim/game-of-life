@@ -47,9 +47,9 @@ impl InteractiveGame for InteractiveGameImpl {
     fn accept_changes(&mut self, changes: &[Change]) {
         for change in changes {
             if change.is_alive {
-                self.grid.set_alive_at(change.x, change.y);
+                self.grid.set_alive_at(change.position);
             } else {
-                self.grid.set_dead_at(change.x, change.y);
+                self.grid.set_dead_at(change.position);
             }
         }
     }
@@ -65,23 +65,20 @@ impl InteractiveGame for InteractiveGameImpl {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::grid::GridMock;
+    use crate::grid::{GridMock, Position};
     use mockers::matchers::ANY;
     use mockers::Scenario;
     const CHANGES: [Change; 3] = [
         Change {
-            x: 20,
-            y: 30,
+            position: Position { x: 20, y: 30 },
             is_alive: false,
         },
         Change {
-            x: 123,
-            y: 432,
+            position: Position { x: 123, y: 432 },
             is_alive: true,
         },
         Change {
-            x: 223,
-            y: 42,
+            position: Position { x: 223, y: 42 },
             is_alive: true,
         },
     ];
@@ -132,9 +129,9 @@ mod test {
         let (scenario, grid, generation_calculator, presenter) = create_mock();
         for change in &CHANGES {
             if change.is_alive {
-                scenario.expect(grid.set_alive_at_call(change.x, change.y).and_return(()))
+                scenario.expect(grid.set_alive_at_call(change.position).and_return(()))
             } else {
-                scenario.expect(grid.set_dead_at_call(change.x, change.y).and_return(()))
+                scenario.expect(grid.set_dead_at_call(change.position).and_return(()))
             }
         }
 

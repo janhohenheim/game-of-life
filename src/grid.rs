@@ -5,13 +5,19 @@ extern crate mockers;
 #[cfg(test)]
 use mockers_derive::mocked;
 
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
+pub struct Position {
+    pub x: u32,
+    pub y: u32,
+}
+
 #[cfg_attr(test, mocked)]
 pub trait Grid {
     fn width(&self) -> u32;
     fn height(&self) -> u32;
-    fn is_alive_at(&self, x: u32, y: u32) -> bool;
-    fn set_alive_at(&mut self, x: u32, y: u32);
-    fn set_dead_at(&mut self, x: u32, y: u32);
+    fn is_alive_at(&self, position: Position) -> bool;
+    fn set_alive_at(&mut self, position: Position);
+    fn set_dead_at(&mut self, position: Position);
 }
 
 #[derive(Debug, Eq, PartialEq, Clone)]
@@ -29,8 +35,8 @@ impl GridImpl {
             height,
         }
     }
-    fn translate_coordinates_to_index(&self, x: u32, y: u32) -> usize {
-        (self.width() * y + x) as usize
+    fn translate_coordinates_to_index(&self, position: Position) -> usize {
+        (self.width() * position.y + position.x) as usize
     }
 }
 
@@ -41,16 +47,16 @@ impl Grid for GridImpl {
     fn height(&self) -> u32 {
         self.height
     }
-    fn is_alive_at(&self, x: u32, y: u32) -> bool {
-        let index = self.translate_coordinates_to_index(x, y);
+    fn is_alive_at(&self, position: Position) -> bool {
+        let index = self.translate_coordinates_to_index(position);
         self.grid[index]
     }
-    fn set_alive_at(&mut self, x: u32, y: u32) {
-        let index = self.translate_coordinates_to_index(x, y);
+    fn set_alive_at(&mut self, position: Position) {
+        let index = self.translate_coordinates_to_index(position);
         self.grid[index] = true;
     }
-    fn set_dead_at(&mut self, x: u32, y: u32) {
-        let index = self.translate_coordinates_to_index(x, y);
+    fn set_dead_at(&mut self, position: Position) {
+        let index = self.translate_coordinates_to_index(position);
         self.grid[index] = false;
     }
 }
@@ -90,15 +96,17 @@ mod test {
     #[test]
     fn grid_sets_alive() {
         let mut grid = GridImpl::new(10, 10);
-        grid.set_alive_at(2, 3);
-        assert_eq!(true, grid.is_alive_at(2, 3));
+        let position = Position { x: 2, y: 3 };
+        grid.set_alive_at(position);
+        assert_eq!(true, grid.is_alive_at(position));
     }
 
     #[test]
     fn grid_sets_dead() {
         let mut grid = GridImpl::new(10, 10);
-        grid.set_alive_at(2, 3);
-        grid.set_dead_at(2, 3);
-        assert_eq!(false, grid.is_alive_at(2, 3));
+        let position = Position { x: 2, y: 3 };
+        grid.set_alive_at(position);
+        grid.set_dead_at(position);
+        assert_eq!(false, grid.is_alive_at(position));
     }
 }
