@@ -22,4 +22,5 @@ pub mod canvas;
 mod controller;
 mod generation_calculator;
 mod grid;
+mod grid_info;
 mod interactive_game;

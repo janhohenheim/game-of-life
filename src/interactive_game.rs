@@ -13,7 +13,7 @@ pub trait GenerationCalculator {
 
 #[cfg_attr(test, mocked)]
 pub trait Presenter {
-    fn init_board(&mut self, width: u32, height: u32, alive_cells: &[Position]);
+    fn init_board(&mut self, alive_cells: &[Position]);
     fn present_changes(&mut self, changes: &[Change]);
 }
 
@@ -45,7 +45,7 @@ impl InteractiveGameImpl {
                 }
             }
         }
-        presenter.init_board(width, height, &alive_cells);
+        presenter.init_board(&alive_cells);
         InteractiveGameImpl {
             grid,
             generation_calculator,
@@ -112,7 +112,7 @@ mod test {
 
         scenario.expect(
             presenter
-                .init_board_call(WIDTH, HEIGHT, ALIVE_INITIALIZED_CELLS.as_ref())
+                .init_board_call(ALIVE_INITIALIZED_CELLS.as_ref())
                 .and_return(()),
         );
 

@@ -1,6 +1,7 @@
 use crate::canvas::constant;
 use crate::generation_calculator::Change;
 use crate::grid::Position;
+use crate::grid_info::GridInfo;
 use crate::interactive_game::Presenter;
 
 #[cfg(test)]
@@ -31,40 +32,36 @@ pub struct Square {
 
 #[cfg_attr(test, mocked)]
 pub trait CanvasView {
-    fn init_board(&mut self, width: u32, height: u32, view_model: &CanvasViewModel);
+    fn init_board(&mut self, grid_info: &GridInfo, view_model: &CanvasViewModel);
     fn draw_view_model(&mut self, view_model: &CanvasViewModel);
 }
 
 pub struct CanvasPresenter {
     view: Box<CanvasView>,
     is_initialized: bool,
-    width: u32,
-    height: u32,
+    grid_info: GridInfo,
 }
 
 impl CanvasPresenter {
-    pub fn new(view: Box<CanvasView>) -> Self {
+    pub fn new(view: Box<CanvasView>, grid_info: GridInfo) -> Self {
         CanvasPresenter {
             view,
             is_initialized: false,
-            width: 0,
-            height: 0,
+            grid_info,
         }
     }
 }
 
 impl Presenter for CanvasPresenter {
-    fn init_board(&mut self, width: u32, height: u32, alive_cells: &[Position]) {
+    fn init_board(&mut self, alive_cells: &[Position]) {
         if self.is_initialized {
             panic!(
                 "Initialized board multiple times \
                  Did you accidentally call .init_board() multiple times?"
             );
         }
-        self.width = width;
-        self.height = height;
         self.is_initialized = true;
-        let lines = get_lines(width, height);
+        let lines = get_lines(&self.grid_info);
         let cells_as_changes = alive_cells
             .iter()
             .map(|&position| Change {
@@ -72,9 +69,9 @@ impl Presenter for CanvasPresenter {
                 is_alive: true,
             })
             .collect::<Vec<_>>();
-        let squares = get_squares(width, height, &cells_as_changes);
+        let squares = get_squares(&self.grid_info, &cells_as_changes);
         let view_model = CanvasViewModel { lines, squares };
-        self.view.init_board(width, height, &view_model);
+        self.view.init_board(&self.grid_info, &view_model);
     }
 
     fn present_changes(&mut self, changes: &[Change]) {
@@ -84,7 +81,7 @@ impl Presenter for CanvasPresenter {
                  Did you forget to call .init_board()?"
             );
         }
-        let squares = get_squares(self.width, self.height, changes);
+        let squares = get_squares(&self.grid_info, changes);
         let view_model = CanvasViewModel {
             lines: Vec::new(),
             squares,
@@ -93,30 +90,30 @@ impl Presenter for CanvasPresenter {
     }
 }
 
-fn get_lines(width: u32, height: u32) -> Vec<Line> {
+fn get_lines(grid_info: &GridInfo) -> Vec<Line> {
     let mut lines = Vec::new();
-    for y in 1..height {
+    for y in 1..grid_info.rows {
         lines.push(Line {
             from: Position {
                 x: 0,
-                y: y * (constant::CANVAS_HEIGHT / height),
+                y: y * (grid_info.height / grid_info.rows),
             },
             to: Position {
-                x: constant::CANVAS_WIDTH,
-                y: y * (constant::CANVAS_HEIGHT / height),
+                x: grid_info.width,
+                y: y * (grid_info.height / grid_info.rows),
             },
             colour: constant::LINE_COLOUR.into(),
         })
     }
-    for x in 1..width {
+    for x in 1..grid_info.columns {
         lines.push(Line {
             from: Position {
-                x: x * (constant::CANVAS_WIDTH / width),
+                x: x * (grid_info.width / grid_info.columns),
                 y: 0,
             },
             to: Position {
-                x: x * (constant::CANVAS_WIDTH / width),
-                y: constant::CANVAS_HEIGHT,
+                x: x * (grid_info.width / grid_info.columns),
+                y: grid_info.height,
             },
             colour: constant::LINE_COLOUR.into(),
         })
@@ -124,11 +121,11 @@ fn get_lines(width: u32, height: u32) -> Vec<Line> {
     lines
 }
 
-fn get_squares(width: u32, height: u32, changes: &[Change]) -> Vec<Square> {
+fn get_squares(grid_info: &GridInfo, changes: &[Change]) -> Vec<Square> {
     let mut squares = Vec::new();
     for change in changes {
-        let cell_width = constant::CANVAS_WIDTH / width - 2;
-        let cell_height = constant::CANVAS_HEIGHT / height - 2;
+        let cell_width = grid_info.width / grid_info.columns - 2;
+        let cell_height = grid_info.height / grid_info.rows - 2;
         squares.push(Square {
             width: cell_width,
             height: cell_height,
@@ -154,6 +151,13 @@ mod test {
 
     const WIDTH: u32 = 10;
     const HEIGHT: u32 = 8;
+
+    const GRID_INFO: GridInfo = GridInfo {
+        width: constant::CANVAS_WIDTH,
+        height: constant::CANVAS_HEIGHT,
+        rows: 8,
+        columns: 10,
+    };
 
     fn create_mock() -> (Scenario, CanvasViewMock) {
         let scenario = Scenario::new();
@@ -198,7 +202,7 @@ mod test {
             };
         }
         scenario.expect(
-            view.init_board_call(WIDTH, HEIGHT, &*EMPTY_INITIALIZED_VIEW_MODEL)
+            view.init_board_call(&GRID_INFO, &*EMPTY_INITIALIZED_VIEW_MODEL)
                 .and_return(()),
         );
     }
@@ -207,7 +211,7 @@ mod test {
     #[should_panic]
     fn panics_when_presenting_changes_and_not_initialized() {
         let (_scenario, view) = create_mock();
-        let mut presenter = CanvasPresenter::new(Box::new(view));
+        let mut presenter = CanvasPresenter::new(Box::new(view), GRID_INFO.clone());
         presenter.present_changes(&Vec::new());
     }
 
@@ -216,8 +220,8 @@ mod test {
         let (scenario, view) = create_mock();
         init_board(&scenario, &view);
 
-        let mut presenter = CanvasPresenter::new(Box::new(view));
-        presenter.init_board(WIDTH, HEIGHT, &Vec::new());
+        let mut presenter = CanvasPresenter::new(Box::new(view), GRID_INFO.clone());
+        presenter.init_board(&Vec::new());
     }
 
     #[test]
@@ -226,9 +230,9 @@ mod test {
         let (scenario, view) = create_mock();
         init_board(&scenario, &view);
 
-        let mut presenter = CanvasPresenter::new(Box::new(view));
-        presenter.init_board(WIDTH, HEIGHT, &Vec::new());
-        presenter.init_board(WIDTH, HEIGHT, &Vec::new());
+        let mut presenter = CanvasPresenter::new(Box::new(view), GRID_INFO.clone());
+        presenter.init_board(&Vec::new());
+        presenter.init_board(&Vec::new());
     }
 
     #[test]
@@ -262,8 +266,8 @@ mod test {
             view.draw_view_model_call(&*EXPECTED_VIEW_MODEL)
                 .and_return(()),
         );
-        let mut presenter = CanvasPresenter::new(Box::new(view));
-        presenter.init_board(WIDTH, HEIGHT, &Vec::new());
+        let mut presenter = CanvasPresenter::new(Box::new(view), GRID_INFO.clone());
+        presenter.init_board(&Vec::new());
         let changes = vec![
             Change {
                 position: Position { x: 2, y: 3 },

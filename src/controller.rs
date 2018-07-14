@@ -1,16 +1,19 @@
+use crate::grid_info::GridInfo;
 use crate::interactive_game::InteractiveGame;
+
 #[cfg(test)]
 extern crate mockers;
 #[cfg(test)]
 use mockers_derive::mocked;
 
-pub struct Controller {
+pub struct ClickableController {
     game: Box<InteractiveGame>,
+    grid_info: GridInfo,
 }
 
-impl Controller {
-    pub fn new(game: Box<InteractiveGame>) -> Self {
-        Controller { game }
+impl ClickableController {
+    pub fn new(game: Box<InteractiveGame>, grid_info: GridInfo) -> Self {
+        ClickableController { game, grid_info }
     }
 
     pub fn on_click(&mut self, x: u32, y: u32) {
