@@ -65,10 +65,39 @@ mod test {
     }
 
     fn init_board(scenario: &Scenario, view: &CanvasViewMock) {
-        lazy_static!{
-            static ref EMPTY_INITIALIZED_VIEW_MODEL: CanvasViewModel = CanvasViewModel {
-                lines: vec![], // To do: Add actual values
-                squares: Vec::new(),
+        lazy_static! {
+            static ref EMPTY_INITIALIZED_VIEW_MODEL: CanvasViewModel = {
+                let mut lines = Vec::new();
+                for y in 1..HEIGHT {
+                    lines.push(Line {
+                        from: Position {
+                            x: 0,
+                            y: y * (constant::CANVAS_HEIGHT / HEIGHT),
+                        },
+                        to: Position {
+                            x: constant::CANVAS_WIDTH,
+                            y: y * (constant::CANVAS_HEIGHT / HEIGHT),
+                        },
+                        colour: constant::LINE_COLOUR.into(),
+                    })
+                }
+                for x in 1..WIDTH {
+                    lines.push(Line {
+                        from: Position {
+                            x: x * (constant::CANVAS_WIDTH / WIDTH),
+                            y: 0,
+                        },
+                        to: Position {
+                            x: x * (constant::CANVAS_WIDTH / WIDTH),
+                            y: constant::CANVAS_HEIGHT,
+                        },
+                        colour: constant::LINE_COLOUR.into(),
+                    })
+                }
+                CanvasViewModel {
+                    lines,
+                    squares: Vec::new(),
+                }
             };
         }
         scenario.expect(
@@ -99,9 +128,26 @@ mod test {
         let (scenario, view) = create_mock();
         init_board(&scenario, &view);
         lazy_static!{
-            static ref EXPECTED_VIEW_MODEL: CanvasViewModel = CanvasViewModel {
-                lines: Vec::new(), // To do: Add actual values
-                squares: Vec::new(),
+            static ref EXPECTED_VIEW_MODEL: CanvasViewModel = {
+                let mut squares = Vec::new();
+                for (x, y) in &[(2, 3), (3, 4), (1, 1)] {
+                    let cell_width = constant::CANVAS_WIDTH / WIDTH - 2;
+                    let cell_height = constant::CANVAS_HEIGHT / HEIGHT - 2;
+                    squares.push(Square {
+                        width: cell_width,
+                        height: cell_height,
+                        origin: Position {
+                            x: cell_width / 2 + x,
+                            y: cell_height / 2 + y,
+                        },
+                        colour: constant::CELL_COLOUR.into(),
+                    });
+                }
+
+                CanvasViewModel {
+                    lines: Vec::new(), // We only send changes to the view, so this is empty
+                    squares,
+                }
             };
         }
         scenario.expect(
