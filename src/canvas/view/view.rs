@@ -1,19 +1,27 @@
-extern crate wasm_bindgen;
-use wasm_bindgen::prelude::*;
-
 use super::js;
 use crate::canvas::constant;
+use crate::canvas::presenter::{CanvasView, CanvasViewModel};
 
-#[wasm_bindgen]
-pub fn init_board(context: &js::CanvasRenderingContext2D) {
-    context.set_fill_style("aquamarine");
-    context.fill_rect(0, 0, constant::CANVAS_WIDTH, constant::CANVAS_HEIGHT);
-    context.set_fill_style("white");
-    context.begin_path();
-    context.move_to(75, 50);
-    context.line_to(100, 75);
-    context.stroke();
-    context.line_to(100, 25);
-    context.line_to(200, 25);
-    context.fill();
+struct CanvasViewImpl {
+    context: js::CanvasRenderingContext2D,
 }
+
+impl CanvasView for CanvasViewImpl {
+    fn init_board(&mut self, width: u32, height: u32, view_model: &CanvasViewModel) {
+        self.context.set_fill_style("aquamarine");
+        self.context
+            .fill_rect(0, 0, constant::CANVAS_WIDTH, constant::CANVAS_HEIGHT);
+        self.context.set_fill_style("white");
+        self.context.begin_path();
+        self.context.move_to(75, 50);
+        self.context.line_to(100, 75);
+        self.context.stroke();
+        self.context.line_to(100, 25);
+        self.context.line_to(200, 25);
+        self.context.fill();
+    }
+    fn draw_view_model(&mut self, view_model: &CanvasViewModel) {}
+}
+
+#[cfg(test)]
+mod test {}

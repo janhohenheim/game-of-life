@@ -15,6 +15,7 @@ extern crate mockers_derive;
 extern crate wasm_bindgen;
 
 #[macro_use]
+#[cfg(test)]
 extern crate lazy_static;
 
 pub mod canvas;
