@@ -137,9 +137,9 @@ fn get_squares(width: u32, height: u32, changes: &[Change]) -> Vec<Square> {
                 y: cell_height / 2 + change.position.y,
             },
             colour: if change.is_alive {
-                constant::CELL_COLOUR.into()
+                constant::ALIVE_CELL_COLOUR.into()
             } else {
-                constant::CELL_COLOUR.into()
+                constant::DEAD_CELL_COLOUR.into()
             },
         });
     }
@@ -150,8 +150,6 @@ fn get_squares(width: u32, height: u32, changes: &[Change]) -> Vec<Square> {
 mod test {
     use super::*;
     use crate::canvas::constant;
-    use crate::interactive_game::InteractiveGameMock;
-    use mockers::matchers::ANY;
     use mockers::Scenario;
 
     const WIDTH: u32 = 10;
@@ -250,7 +248,7 @@ mod test {
                             x: cell_width / 2 + x,
                             y: cell_height / 2 + y,
                         },
-                        colour: constant::CELL_COLOUR.into(),
+                        colour: constant::ALIVE_CELL_COLOUR.into(),
                     });
                 }
 
