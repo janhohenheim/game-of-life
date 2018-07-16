@@ -20,7 +20,7 @@ pub trait GenerationCalculator {
 pub struct GenerationCalculatorImpl;
 
 impl GenerationCalculatorImpl {
-    fn new() -> Self {
+    pub fn new() -> Self {
         GenerationCalculatorImpl
     }
 }

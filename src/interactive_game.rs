@@ -1,15 +1,10 @@
-use crate::generation_calculator::Change;
+use crate::generation_calculator::{Change, GenerationCalculator};
 use crate::grid::{Grid, Position};
 
 #[cfg(test)]
 extern crate mockers;
 #[cfg(test)]
 use mockers_derive::mocked;
-
-#[cfg_attr(test, mocked)]
-pub trait GenerationCalculator {
-    fn next_generation(&self, grid: &Grid) -> Vec<Change>;
-}
 
 #[cfg_attr(test, mocked)]
 pub trait Presenter {
@@ -86,9 +81,11 @@ impl InteractiveGame for InteractiveGameImpl {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::generation_calculator::GenerationCalculatorMock;
     use crate::grid::{GridMock, Position};
     use mockers::matchers::ANY;
     use mockers::{Scenario, Sequence};
+
     const CHANGES: [Change; 3] = [
         Change {
             position: Position { x: 20, y: 30 },

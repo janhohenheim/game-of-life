@@ -3,8 +3,14 @@ use crate::canvas::constant;
 use crate::canvas::presenter::{CanvasView, CanvasViewModel};
 use crate::grid_info::GridInfo;
 
-struct CanvasViewImpl {
+pub struct CanvasViewImpl {
     context: js::CanvasRenderingContext2D,
+}
+
+impl CanvasViewImpl {
+    pub fn new(context: js::CanvasRenderingContext2D) -> Self {
+        CanvasViewImpl { context }
+    }
 }
 
 impl CanvasView for CanvasViewImpl {
