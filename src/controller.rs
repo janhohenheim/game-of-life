@@ -19,7 +19,11 @@ impl ClickableController {
     }
 
     pub fn on_click(&mut self, x: u32, y: u32) {
-        unimplemented!()
+        let cell_position = self.get_cell_location_from_coordinates(x, y);
+        if let Some((x, y)) = cell_position {
+            let position = Position { x, y };
+            self.game.toggle_cell(&position);
+        }
     }
 
     pub fn on_timer(&mut self) {
@@ -31,8 +35,10 @@ impl ClickableController {
             None
         } else {
             let cell_width = self.grid_info.width / self.grid_info.columns;
-            let cell_height = self.grid_info.height / self.grid_info.rows;;
-            None
+            let cell_height = self.grid_info.height / self.grid_info.rows;
+            let cell_x = x / cell_width;
+            let cell_y = y / cell_height;
+            Some((cell_x, cell_y))
         }
     }
 }
@@ -77,40 +83,11 @@ mod test {
     }
 
     #[test]
-    fn changes_dead_cell_to_alive_on_click() {
+    fn toggles_cell_on_click() {
         let (scenario, game, grid_info) = create_mock();
-        static CHANGES: [Change; 1] = [Change {
-            position: Position { x: 1, y: 1 },
-            is_alive: true,
-        }];
-        scenario.expect(game.accept_changes_call(CHANGES.as_ref()).and_return(()));
+        const POSITION: Position = Position { x: 1, y: 2 };
+        scenario.expect(game.toggle_cell_call(&POSITION).and_return(()));
         let mut controller = ClickableController::new(Box::new(game), grid_info);
-        controller.on_click(2, 3);
-    }
-
-    #[test]
-    fn changes_alive_cell_to_dead_on_click() {
-        let (scenario, game, grid_info) = create_mock();
-        static ALIVE_CHANGE: [Change; 1] = [Change {
-            position: Position { x: 1, y: 1 },
-            is_alive: true,
-        }];
-        static DEAD_CHANGE: [Change; 1] = [Change {
-            position: Position { x: 1, y: 1 },
-            is_alive: false,
-        }];
-        let mut seq = Sequence::new();
-        seq.expect(
-            game.accept_changes_call(ALIVE_CHANGE.as_ref())
-                .and_return(()),
-        );
-        seq.expect(
-            game.accept_changes_call(DEAD_CHANGE.as_ref())
-                .and_return(()),
-        );
-        scenario.expect(seq);
-        let mut controller = ClickableController::new(Box::new(game), grid_info);
-        controller.on_click(2, 3);
-        controller.on_click(2, 3);
+        controller.on_click(2, 5);
     }
 }

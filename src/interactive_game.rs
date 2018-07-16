@@ -21,6 +21,7 @@ pub trait Presenter {
 pub trait InteractiveGame {
     fn accept_changes(&mut self, changes: &[Change]);
     fn next_generation(&mut self);
+    fn toggle_cell(&mut self, position: &Position);
 }
 
 pub struct InteractiveGameImpl {
@@ -71,6 +72,15 @@ impl InteractiveGame for InteractiveGameImpl {
             self.presenter.present_changes(&changes);
         }
     }
+
+    fn toggle_cell(&mut self, position: &Position) {
+        let is_alive = self.grid.is_alive_at(*position);
+        if is_alive {
+            self.grid.set_dead_at(*position);
+        } else {
+            self.grid.set_alive_at(*position);
+        }
+    }
 }
 
 #[cfg(test)]
@@ -78,7 +88,7 @@ mod test {
     use super::*;
     use crate::grid::{GridMock, Position};
     use mockers::matchers::ANY;
-    use mockers::Scenario;
+    use mockers::{Scenario, Sequence};
     const CHANGES: [Change; 3] = [
         Change {
             position: Position { x: 20, y: 30 },
@@ -122,7 +132,7 @@ mod test {
     #[test]
     fn inits_presenter_with_grid_data() {
         let (_scenario, grid, generation_calculator, presenter) = create_mock();
-        let game = InteractiveGameImpl::new(
+        let _game = InteractiveGameImpl::new(
             Box::new(grid),
             Box::new(generation_calculator),
             Box::new(presenter),
@@ -163,6 +173,55 @@ mod test {
             Box::new(presenter),
         );
         game.accept_changes(CHANGES.as_ref());
+    }
+
+    #[test]
+    fn toggles_dead_cell() {
+        let (scenario, grid, generation_calculator, presenter) = create_mock();
+        const POSITION: Position = Position { x: 23, y: 74 };
+        scenario.expect(grid.set_alive_at_call(POSITION).and_return(()));
+
+        let mut game = InteractiveGameImpl::new(
+            Box::new(grid),
+            Box::new(generation_calculator),
+            Box::new(presenter),
+        );
+        game.toggle_cell(&POSITION);
+    }
+
+    #[test]
+    fn toggles_living_cell() {
+        let (scenario, grid, generation_calculator, presenter) = create_mock();
+        const POSITION: Position = Position { x: 300, y: 123 };
+        let mut seq = Sequence::new();
+        seq.expect(grid.is_alive_at_call(POSITION).and_return(true));
+        seq.expect(grid.set_dead_at_call(POSITION).and_return(()));
+        scenario.expect(seq);
+        let mut game = InteractiveGameImpl::new(
+            Box::new(grid),
+            Box::new(generation_calculator),
+            Box::new(presenter),
+        );
+        game.toggle_cell(&POSITION);
+    }
+
+    #[test]
+    fn toggles_cell_dead_again() {
+        let (scenario, grid, generation_calculator, presenter) = create_mock();
+        const POSITION: Position = Position { x: 23, y: 74 };
+        let mut seq = Sequence::new();
+        seq.expect(grid.is_alive_at_call(POSITION).and_return(false));
+        seq.expect(grid.set_alive_at_call(POSITION).and_return(()));
+        seq.expect(grid.is_alive_at_call(POSITION).and_return(true));
+        seq.expect(grid.set_dead_at_call(POSITION).and_return(()));
+        scenario.expect(seq);
+        let mut game = InteractiveGameImpl::new(
+            Box::new(grid),
+            Box::new(generation_calculator),
+            Box::new(presenter),
+        );
+        game.toggle_cell(&POSITION);
+        game.toggle_cell(&POSITION);
     }
 
     #[test]
