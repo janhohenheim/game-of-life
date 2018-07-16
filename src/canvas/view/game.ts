@@ -8,9 +8,10 @@ rust.then(rust => {
     const game = rust.Game.new();
 
     canvas.addEventListener('click', (e) => {
+        const rect = canvas.getBoundingClientRect();
         const pos = {
-            x: e.clientX,
-            y: e.clientY
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
         };
         console.log(pos);
     });
