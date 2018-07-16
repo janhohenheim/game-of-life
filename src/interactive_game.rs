@@ -69,12 +69,17 @@ impl InteractiveGame for InteractiveGameImpl {
     }
 
     fn toggle_cell(&mut self, position: &Position) {
-        let is_alive = self.grid.is_alive_at(*position);
-        if is_alive {
-            self.grid.set_dead_at(*position);
-        } else {
+        let should_be_alive = !self.grid.is_alive_at(*position);
+        let change = Change {
+            position: *position,
+            is_alive: should_be_alive,
+        };
+        if change.is_alive {
             self.grid.set_alive_at(*position);
+        } else {
+            self.grid.set_dead_at(*position);
         }
+        self.presenter.present_changes(&[change]);
     }
 }
 
@@ -175,50 +180,87 @@ mod test {
     #[test]
     fn toggles_dead_cell() {
         let (scenario, grid, generation_calculator, presenter) = create_mock();
-        const POSITION: Position = Position { x: 23, y: 74 };
-        scenario.expect(grid.set_alive_at_call(POSITION).and_return(()));
+        const CHANGE: Change = Change {
+            position: Position { x: 23, y: 74 },
+            is_alive: true,
+        };
+
+        scenario.expect(grid.set_alive_at_call(CHANGE.position).and_return(()));
+        scenario.expect(
+            presenter
+                .present_changes_call([CHANGE].as_ref())
+                .and_return(()),
+        );
 
         let mut game = InteractiveGameImpl::new(
             Box::new(grid),
             Box::new(generation_calculator),
             Box::new(presenter),
         );
-        game.toggle_cell(&POSITION);
+        game.toggle_cell(&CHANGE.position);
     }
 
     #[test]
     fn toggles_living_cell() {
         let (scenario, grid, generation_calculator, presenter) = create_mock();
-        const POSITION: Position = Position { x: 300, y: 123 };
+        const CHANGE: Change = Change {
+            position: Position { x: 300, y: 123 },
+            is_alive: false,
+        };
         let mut seq = Sequence::new();
-        seq.expect(grid.is_alive_at_call(POSITION).and_return(true));
-        seq.expect(grid.set_dead_at_call(POSITION).and_return(()));
+        seq.expect(grid.is_alive_at_call(CHANGE.position).and_return(true));
+        seq.expect(grid.set_dead_at_call(CHANGE.position).and_return(()));
+        seq.expect(
+            presenter
+                .present_changes_call([CHANGE].as_ref())
+                .and_return(()),
+        );
         scenario.expect(seq);
         let mut game = InteractiveGameImpl::new(
             Box::new(grid),
             Box::new(generation_calculator),
             Box::new(presenter),
         );
-        game.toggle_cell(&POSITION);
+        game.toggle_cell(&CHANGE.position);
     }
 
     #[test]
     fn toggles_cell_dead_again() {
         let (scenario, grid, generation_calculator, presenter) = create_mock();
-        const POSITION: Position = Position { x: 23, y: 74 };
+        const ALIVE_CHANGE: Change = Change {
+            position: Position { x: 23, y: 74 },
+            is_alive: true,
+        };
         let mut seq = Sequence::new();
-        seq.expect(grid.is_alive_at_call(POSITION).and_return(false));
-        seq.expect(grid.set_alive_at_call(POSITION).and_return(()));
-        seq.expect(grid.is_alive_at_call(POSITION).and_return(true));
-        seq.expect(grid.set_dead_at_call(POSITION).and_return(()));
+        seq.expect(
+            grid.is_alive_at_call(ALIVE_CHANGE.position)
+                .and_return(false),
+        );
+        seq.expect(grid.set_alive_at_call(ALIVE_CHANGE.position).and_return(()));
+        seq.expect(
+            presenter
+                .present_changes_call([ALIVE_CHANGE].as_ref())
+                .and_return(()),
+        );
+        const DEAD_CHANGE: Change = Change {
+            position: Position { x: 23, y: 74 },
+            is_alive: false,
+        };
+        seq.expect(grid.is_alive_at_call(DEAD_CHANGE.position).and_return(true));
+        seq.expect(grid.set_dead_at_call(DEAD_CHANGE.position).and_return(()));
+        seq.expect(
+            presenter
+                .present_changes_call([DEAD_CHANGE].as_ref())
+                .and_return(()),
+        );
         scenario.expect(seq);
         let mut game = InteractiveGameImpl::new(
             Box::new(grid),
             Box::new(generation_calculator),
             Box::new(presenter),
         );
-        game.toggle_cell(&POSITION);
-        game.toggle_cell(&POSITION);
+        game.toggle_cell(&ALIVE_CHANGE.position);
+        game.toggle_cell(&ALIVE_CHANGE.position);
     }
 
     #[test]

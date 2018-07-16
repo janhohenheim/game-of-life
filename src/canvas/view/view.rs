@@ -38,6 +38,8 @@ impl CanvasView for CanvasViewImpl {
         for square in &view_model.squares {
             self.draw_square(square);
         }
+        let msg = format!("{:#?}", view_model);
+        js::console::log(&msg);
     }
 }
 
