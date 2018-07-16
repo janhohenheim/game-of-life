@@ -32,7 +32,7 @@ pub struct Square {
 
 #[cfg_attr(test, mocked)]
 pub trait CanvasView {
-    fn init_board(&mut self, grid_info: &GridInfo, view_model: &CanvasViewModel);
+    fn init_board(&mut self, view_model: &CanvasViewModel);
     fn draw_view_model(&mut self, view_model: &CanvasViewModel);
 }
 
@@ -71,7 +71,7 @@ impl Presenter for CanvasPresenter {
             .collect::<Vec<_>>();
         let squares = get_squares(&self.grid_info, &cells_as_changes);
         let view_model = CanvasViewModel { lines, squares };
-        self.view.init_board(&self.grid_info, &view_model);
+        self.view.init_board(&view_model);
     }
 
     fn present_changes(&mut self, changes: &[Change]) {
@@ -202,7 +202,7 @@ mod test {
             };
         }
         scenario.expect(
-            view.init_board_call(&GRID_INFO, &*EMPTY_INITIALIZED_VIEW_MODEL)
+            view.init_board_call(&*EMPTY_INITIALIZED_VIEW_MODEL)
                 .and_return(()),
         );
     }

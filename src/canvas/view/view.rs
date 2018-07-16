@@ -5,16 +5,17 @@ use crate::grid_info::GridInfo;
 
 pub struct CanvasViewImpl {
     context: js::CanvasRenderingContext2D,
+    grid_info: GridInfo,
 }
 
 impl CanvasViewImpl {
-    pub fn new(context: js::CanvasRenderingContext2D) -> Self {
-        CanvasViewImpl { context }
+    pub fn new(context: js::CanvasRenderingContext2D, grid_info: GridInfo) -> Self {
+        CanvasViewImpl { context, grid_info }
     }
 }
 
 impl CanvasView for CanvasViewImpl {
-    fn init_board(&mut self, grid_info: &GridInfo, view_model: &CanvasViewModel) {
+    fn init_board(&mut self, view_model: &CanvasViewModel) {
         self.context.set_fill_style("aquamarine");
         self.context
             .fill_rect(0, 0, constant::CANVAS_WIDTH, constant::CANVAS_HEIGHT);
