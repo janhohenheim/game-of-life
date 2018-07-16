@@ -3,13 +3,16 @@ const rust = import("../../../wasm_generated/game_of_life");
 rust.then(rust => {
     const canvas = document.getElementById('game-board') as HTMLCanvasElement;
     const ctx = canvas.getContext('2d');
-    const game = rust.Game.new();
+    const game = rust.Game.new(ctx);
 
     canvas.addEventListener('click', (e) => {
         const pos = getMousePos(canvas, e);
+        game.on_click(pos.x, pos.y);
         console.log(pos);
     });
-    game.start();
+    window.setTimeout(() => {
+        game.on_timer();
+    }, 500);
 })
 
 class MousePosition {

@@ -1,4 +1,5 @@
 extern crate wasm_bindgen;
+use crate::canvas::constant;
 use crate::canvas::presenter::CanvasPresenter;
 use crate::canvas::view::js;
 use crate::canvas::view::CanvasViewImpl;
@@ -18,12 +19,12 @@ pub struct Game {
 impl Game {
     pub fn new(context: js::CanvasRenderingContext2D) -> Self {
         let grid_info = GridInfo {
-            width: 1000,
-            height: 1000,
+            width: constant::CANVAS_WIDTH,
+            height: constant::CANVAS_HEIGHT,
             rows: 100,
             columns: 100,
         };
-        let view = Box::new(CanvasViewImpl::new(context, grid_info.clone()));
+        let view = Box::new(CanvasViewImpl::new(context));
         let presenter = Box::new(CanvasPresenter::new(view, grid_info.clone()));
         let generation_calculator = Box::new(GenerationCalculatorImpl::new());
         let grid = Box::new(GridImpl::new(grid_info.columns, grid_info.rows));

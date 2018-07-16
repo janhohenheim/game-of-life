@@ -11,23 +11,23 @@ use mockers_derive::mocked;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct CanvasViewModel {
-    lines: Vec<Line>,
-    squares: Vec<Square>,
+    pub lines: Vec<Line>,
+    pub squares: Vec<Square>,
 }
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Line {
-    from: Position,
-    to: Position,
-    colour: String,
+    pub from: Position,
+    pub to: Position,
+    pub colour: String,
 }
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Square {
-    width: u32,
-    height: u32,
-    origin: Position,
-    colour: String,
+    pub width: u32,
+    pub height: u32,
+    pub origin: Position,
+    pub colour: String,
 }
 
 #[cfg_attr(test, mocked)]
