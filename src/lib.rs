@@ -19,8 +19,9 @@ extern crate wasm_bindgen;
 extern crate lazy_static;
 
 pub mod canvas;
-mod controller;
+pub mod entrypoint;
 mod generation_calculator;
 mod grid;
 mod grid_info;
+mod input_handler;
 mod interactive_game;

@@ -8,19 +8,19 @@ extern crate mockers;
 use mockers_derive::mocked;
 
 #[cfg_attr(test, mocked)]
-pub trait ClickableController {
+pub trait ClickableInputHandler {
     fn on_click(&mut self, x: u32, y: u32);
     fn on_timer(&mut self);
 }
 
-pub struct ClickableControllerImpl {
+pub struct ClickableInputHandlerImpl {
     game: Box<InteractiveGame>,
     grid_info: GridInfo,
 }
 
-impl ClickableControllerImpl {
+impl ClickableInputHandlerImpl {
     pub fn new(game: Box<InteractiveGame>, grid_info: GridInfo) -> Self {
-        ClickableControllerImpl { game, grid_info }
+        ClickableInputHandlerImpl { game, grid_info }
     }
 
     fn get_cell_location_from_coordinates(&self, x: u32, y: u32) -> Option<(u32, u32)> {
@@ -36,7 +36,7 @@ impl ClickableControllerImpl {
     }
 }
 
-impl ClickableController for ClickableControllerImpl {
+impl ClickableInputHandler for ClickableInputHandlerImpl {
     fn on_click(&mut self, x: u32, y: u32) {
         let cell_position = self.get_cell_location_from_coordinates(x, y);
         if let Some((x, y)) = cell_position {
@@ -75,17 +75,17 @@ mod test {
     fn calls_next_gen_on_timer() {
         let (scenario, game, grid_info) = create_mock();
         scenario.expect(game.next_generation_call().and_return(()));
-        let mut controller = ClickableControllerImpl::new(Box::new(game), grid_info);
-        controller.on_timer();
+        let mut input_handler = ClickableInputHandlerImpl::new(Box::new(game), grid_info);
+        input_handler.on_timer();
     }
 
     #[test]
     fn ignores_out_of_bounds_clicks() {
         let (_scenario, game, grid_info) = create_mock();
-        let mut controller = ClickableControllerImpl::new(Box::new(game), grid_info);
-        controller.on_click(11, 9);
-        controller.on_click(10, 9);
-        controller.on_click(11, 8);
+        let mut input_handler = ClickableInputHandlerImpl::new(Box::new(game), grid_info);
+        input_handler.on_click(11, 9);
+        input_handler.on_click(10, 9);
+        input_handler.on_click(11, 8);
     }
 
     #[test]
@@ -93,7 +93,7 @@ mod test {
         let (scenario, game, grid_info) = create_mock();
         const POSITION: Position = Position { x: 1, y: 2 };
         scenario.expect(game.toggle_cell_call(&POSITION).and_return(()));
-        let mut controller = ClickableControllerImpl::new(Box::new(game), grid_info);
-        controller.on_click(2, 5);
+        let mut input_handler = ClickableInputHandlerImpl::new(Box::new(game), grid_info);
+        input_handler.on_click(2, 5);
     }
 }

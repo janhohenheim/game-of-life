@@ -3,7 +3,7 @@ const rust = import("../../../wasm_generated/game_of_life");
 rust.then(rust => {
     const canvas = document.getElementById('game-board') as HTMLCanvasElement;
     const ctx = canvas.getContext('2d');
-    const game = rust.Game.new(ctx);
+    const game = rust.EntryPoint.new(ctx);
 
     canvas.addEventListener('click', (e) => {
         const pos = getMousePos(canvas, e);

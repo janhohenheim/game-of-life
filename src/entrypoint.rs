@@ -3,20 +3,20 @@ use crate::canvas::constant;
 use crate::canvas::presenter::CanvasPresenter;
 use crate::canvas::view::js;
 use crate::canvas::view::CanvasViewImpl;
-use crate::controller::{ClickableController, ClickableControllerImpl};
 use crate::generation_calculator::GenerationCalculatorImpl;
 use crate::grid::GridImpl;
 use crate::grid_info::GridInfo;
+use crate::input_handler::{ClickableInputHandler, ClickableInputHandlerImpl};
 use crate::interactive_game::InteractiveGameImpl;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
-pub struct Game {
-    controller: Box<ClickableController>,
+pub struct EntryPoint {
+    input_handler: Box<ClickableInputHandler>,
 }
 
 #[wasm_bindgen]
-impl Game {
+impl EntryPoint {
     pub fn new(context: js::CanvasRenderingContext2D) -> Self {
         let grid_info = GridInfo {
             width: constant::CANVAS_WIDTH,
@@ -33,27 +33,27 @@ impl Game {
             generation_calculator,
             presenter,
         ));
-        let controller = Box::new(ClickableControllerImpl::new(game, grid_info));
-        Game { controller }
+        let input_handler = Box::new(ClickableInputHandlerImpl::new(game, grid_info));
+        EntryPoint { input_handler }
     }
 
     #[wasm_bindgen]
     pub fn on_click(&mut self, x: u32, y: u32) {
-        (self as &mut dyn ClickableController).on_click(x, y);
+        (self as &mut dyn ClickableInputHandler).on_click(x, y);
     }
 
     #[wasm_bindgen]
     pub fn on_timer(&mut self) {
-        (self as &mut dyn ClickableController).on_timer();
+        (self as &mut dyn ClickableInputHandler).on_timer();
     }
 }
 
-impl ClickableController for Game {
+impl ClickableInputHandler for EntryPoint {
     fn on_click(&mut self, x: u32, y: u32) {
-        self.controller.on_click(x, y);
+        self.input_handler.on_click(x, y);
     }
 
     fn on_timer(&mut self) {
-        self.controller.on_timer();
+        self.input_handler.on_timer();
     }
 }
