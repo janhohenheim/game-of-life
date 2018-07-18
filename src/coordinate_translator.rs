@@ -16,7 +16,7 @@ pub trait ViewInfo {
     fn y_offset(&self) -> u32;
 }
 
-struct CoordinateTranslatorImpl {
+pub struct CoordinateTranslatorImpl {
     view_info: Box<ViewInfo>,
 }
 

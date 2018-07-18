@@ -3,6 +3,7 @@ use crate::canvas::constant;
 use crate::canvas::presenter::CanvasPresenter;
 use crate::canvas::view::js;
 use crate::canvas::view::CanvasViewImpl;
+use crate::coordinate_translator::CoordinateTranslatorImpl;
 use crate::generation_calculator::GenerationCalculatorImpl;
 use crate::grid::GridImpl;
 use crate::grid_info::GridInfo;
@@ -17,13 +18,16 @@ pub struct EntryPoint {
 
 #[wasm_bindgen]
 impl EntryPoint {
-    pub fn new(context: js::CanvasRenderingContext2D) -> Self {
+    pub fn new(canvas: js::HTMLCanvasElement) -> Self {
         let grid_info = GridInfo {
             width: constant::CANVAS_WIDTH,
             height: constant::CANVAS_HEIGHT,
             rows: 100,
             columns: 100,
         };
+        let context = canvas.get_context("2d");
+        let view_info = Box::new(canvas);
+        let coordinate_translator = Box::new(CoordinateTranslatorImpl::new(view_info));
         let view = Box::new(CanvasViewImpl::new(context));
         let presenter = Box::new(CanvasPresenter::new(view, grid_info.clone()));
         let generation_calculator = Box::new(GenerationCalculatorImpl::new());
@@ -33,7 +37,11 @@ impl EntryPoint {
             generation_calculator,
             presenter,
         ));
-        let input_handler = Box::new(ClickableInputHandlerImpl::new(game, grid_info));
+        let input_handler = Box::new(ClickableInputHandlerImpl::new(
+            game,
+            coordinate_translator,
+            grid_info,
+        ));
         EntryPoint { input_handler }
     }
 
