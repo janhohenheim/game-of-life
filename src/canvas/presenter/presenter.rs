@@ -75,8 +75,6 @@ impl Presenter for CanvasPresenter {
     }
 
     fn present_changes(&mut self, changes: &[Change]) {
-        use crate::canvas::view::js;
-        js::console::log(&format!("{:#?}", changes));
         if !self.is_initialized {
             panic!(
                 "Presenting changes to board before initilizing. \

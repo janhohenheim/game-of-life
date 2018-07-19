@@ -5,7 +5,7 @@ use wasm_bindgen::prelude::*;
 extern "C" {
     pub type CanvasRenderingContext2D;
 
-    #[wasm_bindgen(method, setter, structural)]
+    #[wasm_bindgen(method, setter = fillStyle)]
     pub fn set_fill_style(this: &CanvasRenderingContext2D, fill_style: &str);
 
     #[wasm_bindgen(method, js_name = fillRect)]
