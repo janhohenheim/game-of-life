@@ -64,8 +64,16 @@ mod test {
     fn create_mock() -> (Scenario, ViewInfoMock) {
         let scenario = Scenario::new();
         let view_info = scenario.create_mock_for::<ViewInfo>();
-        scenario.expect(view_info.x_offset_call().and_return(5));
-        scenario.expect(view_info.y_offset_call().and_return(3));
+        scenario.expect(view_info.view_rect_call().and_return(Rect {
+            width: 1000,
+            height: 1000,
+            origin: Position { x: 771, y: 0 },
+        }));
+        scenario.expect(view_info.client_rect_call().and_return(Rect {
+            width: 1000,
+            height: 1000,
+            origin: Position { x: 0, y: 0 },
+        }));
         (scenario, view_info)
     }
 
@@ -73,9 +81,9 @@ mod test {
     fn converts_to_local() {
         let (_scenario, view_info) = create_mock();
         let coordinate_translator = CoordinateTranslatorImpl::new(Box::new(view_info));
-        let global = Position { x: 10, y: 7 };
+        let global = Position { x: 772, y: 7 };
         let local = coordinate_translator.to_local(&global);
-        let expected = Some(Position { x: 5, y: 4 });
+        let expected = Some(Position { x: 1, y: 7 });
         assert_eq!(expected, local);
     }
 
@@ -86,15 +94,5 @@ mod test {
         let global = Position { x: 3, y: 3 };
         let local = coordinate_translator.to_local(&global);
         assert_eq!(None, local);
-    }
-
-    #[test]
-    fn converts_to_global() {
-        let (_scenario, view_info) = create_mock();
-        let coordinate_translator = CoordinateTranslatorImpl::new(Box::new(view_info));
-        let local = Position { x: 10, y: 7 };
-        let global = coordinate_translator.to_global(&local);
-        let expected = Position { x: 15, y: 10 };
-        assert_eq!(expected, global);
     }
 }
