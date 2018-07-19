@@ -8,7 +8,7 @@ rust.then(rust => {
         const pos = getMousePos(canvas, e);
         game.on_click(pos.x, pos.y);
     });
-    window.setTimeout(() => {
+    window.setInterval(() => {
         game.on_timer();
     }, 500);
 })
