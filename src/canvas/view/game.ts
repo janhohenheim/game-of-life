@@ -16,7 +16,10 @@ rust.then(rust => {
     let speed = Number(speedSlider.value)
     let isGameRunning = false
 
-    startStop.addEventListener('click', (e) => {
+    startStop.addEventListener('click', onAddingCell)
+    startStop.addEventListener('touchstart', onAddingCell)
+
+    function onAddingCell(e: MouseEvent | TouchEvent) {
         if (isGameRunning) {
             stopGame()
             startStop.innerText = "Start"
@@ -25,7 +28,7 @@ rust.then(rust => {
             startStop.innerText = "Stop"
         }
         isGameRunning = !isGameRunning
-    })
+    }
 
     speedSlider.addEventListener('change', (e) => {
         speed = Number(speedSlider.value)
