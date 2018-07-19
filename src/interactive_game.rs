@@ -275,6 +275,13 @@ mod test {
                 .and_return(()),
         );
 
+        for change in &CHANGES {
+            if change.is_alive {
+                scenario.expect(grid.set_alive_at_call(change.position).and_return(()));
+            } else {
+                scenario.expect(grid.set_dead_at_call(change.position).and_return(()));
+            }
+        }
         let mut game = InteractiveGameImpl::new(
             Box::new(grid),
             Box::new(generation_calculator),
