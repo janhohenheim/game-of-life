@@ -18,8 +18,5 @@ sudo apt-get update && sudo apt-get install yarn
 yarn global add n
 sudo n latest
 yarn global add now
+yarn global add serve
 yarn
-
-# The following assumes the env vars CADDY_ACCOUNT_ID and CADDY_API_KEY
-# You can find their values at https://caddyserver.com/account/dashboard
-sudo curl https://getcaddy.com | bash -s personal
