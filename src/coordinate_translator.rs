@@ -7,13 +7,19 @@ use mockers_derive::mocked;
 #[cfg_attr(test, mocked)]
 pub trait CoordinateTranslator {
     fn to_local(&self, position: &Position) -> Option<Position>;
-    fn to_global(&self, position: &Position) -> Position;
+}
+
+#[derive(Debug, Clone)]
+pub struct Rect {
+    pub origin: Position,
+    pub width: u32,
+    pub height: u32,
 }
 
 #[cfg_attr(test, mocked)]
 pub trait ViewInfo {
-    fn x_offset(&self) -> u32;
-    fn y_offset(&self) -> u32;
+    fn view_rect(&self) -> Rect;
+    fn client_rect(&self) -> Rect;
 }
 
 pub struct CoordinateTranslatorImpl {
@@ -28,21 +34,23 @@ impl CoordinateTranslatorImpl {
 
 impl CoordinateTranslator for CoordinateTranslatorImpl {
     fn to_local(&self, position: &Position) -> Option<Position> {
-        let x_offset = self.view_info.x_offset();
-        let y_offset = self.view_info.y_offset();
-        if x_offset > position.x || y_offset > position.y {
+        let view_rect = self.view_info.view_rect();
+        let client_rect = self.view_info.client_rect();
+        let x_scale = client_rect.width / view_rect.width;
+        let y_scale = client_rect.height / view_rect.height;
+        let local_x: i32 = (position.x as i32 - view_rect.origin.x as i32) * x_scale as i32;
+        let local_y: i32 = (position.y as i32 - view_rect.origin.y as i32) * y_scale as i32;
+        if local_x < 0
+            || local_y < 0
+            || local_x > client_rect.width as i32
+            || local_y > client_rect.height as i32
+        {
             None
         } else {
             Some(Position {
-                x: position.x - x_offset,
-                y: position.y - y_offset,
+                x: local_x as u32,
+                y: local_y as u32,
             })
-        }
-    }
-    fn to_global(&self, position: &Position) -> Position {
-        Position {
-            x: position.x + self.view_info.x_offset(),
-            y: position.y + self.view_info.y_offset(),
         }
     }
 }

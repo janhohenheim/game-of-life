@@ -34,6 +34,12 @@ extern "C" {
     #[wasm_bindgen(method, js_name = getContext)]
     pub fn get_context(this: &HTMLCanvasElement, contextType: &str) -> CanvasRenderingContext2D;
 
+    #[wasm_bindgen(method, getter, structural)]
+    pub fn width(this: &HTMLCanvasElement) -> i32;
+
+    #[wasm_bindgen(method, getter, structural)]
+    pub fn height(this: &HTMLCanvasElement) -> i32;
+
     pub type DOMRect;
 
     #[wasm_bindgen(method, getter, structural)]

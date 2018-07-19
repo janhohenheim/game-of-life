@@ -36,6 +36,9 @@ impl ClickableInputHandlerImpl {
     fn get_cell_location_from_coordinates(&self, x: u32, y: u32) -> Option<(u32, u32)> {
         let global_position = Position { x, y };
         if let Some(position) = self.coordinate_translator.to_local(&global_position) {
+            use crate::canvas::view::js;
+            let msg = format!("{:#?}", position);
+            js::console::log(&msg);
             if position.x > self.grid_info.width || position.y > self.grid_info.height {
                 None
             } else {
