@@ -1,5 +1,10 @@
 {
     "name": "wasm",
     "alias": "wasm-jnferner",
+    "files": [
+        "index.html",
+        "dist",
+        "wasm_generated"
+    ],
     "type": "static"
 }
