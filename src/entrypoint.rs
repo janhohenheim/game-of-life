@@ -3,7 +3,7 @@ use crate::canvas::constant;
 use crate::canvas::presenter::CanvasPresenter;
 use crate::canvas::view::js;
 use crate::canvas::view::CanvasViewImpl;
-use crate::coordinate_translator::CoordinateTranslatorImpl;
+use crate::coordinate_translator::IdentityCoordinateTranslator;
 use crate::generation_calculator::GenerationCalculatorImpl;
 use crate::grid::GridImpl;
 use crate::grid_info::GridInfo;
@@ -27,7 +27,7 @@ impl EntryPoint {
         };
         let context = canvas.get_context("2d");
         let view_info = Box::new(canvas);
-        let coordinate_translator = Box::new(CoordinateTranslatorImpl::new(view_info));
+        let coordinate_translator = Box::new(IdentityCoordinateTranslator);
         let view = Box::new(CanvasViewImpl::new(context));
         let presenter = Box::new(CanvasPresenter::new(view, grid_info.clone()));
         let generation_calculator = Box::new(GenerationCalculatorImpl::new());

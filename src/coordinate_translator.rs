@@ -22,17 +22,17 @@ pub trait ViewInfo {
     fn client_rect(&self) -> Rect;
 }
 
-pub struct CoordinateTranslatorImpl {
+pub struct ScalingTranslatorImpl {
     view_info: Box<ViewInfo>,
 }
 
-impl CoordinateTranslatorImpl {
+impl ScalingTranslatorImpl {
     pub fn new(view_info: Box<dyn ViewInfo>) -> Self {
-        CoordinateTranslatorImpl { view_info }
+        ScalingTranslatorImpl { view_info }
     }
 }
 
-impl CoordinateTranslator for CoordinateTranslatorImpl {
+impl CoordinateTranslator for ScalingTranslatorImpl {
     fn to_local(&self, position: &Position) -> Option<Position> {
         let view_rect = self.view_info.view_rect();
         let client_rect = self.view_info.client_rect();
@@ -52,6 +52,14 @@ impl CoordinateTranslator for CoordinateTranslatorImpl {
                 y: local_y as u32,
             })
         }
+    }
+}
+
+pub struct IdentityCoordinateTranslator;
+
+impl CoordinateTranslator for IdentityCoordinateTranslator {
+    fn to_local(&self, position: &Position) -> Option<Position> {
+        Some(position.clone())
     }
 }
 
@@ -80,7 +88,7 @@ mod test {
     #[test]
     fn converts_to_local() {
         let (_scenario, view_info) = create_mock();
-        let coordinate_translator = CoordinateTranslatorImpl::new(Box::new(view_info));
+        let coordinate_translator = ScalingTranslatorImpl::new(Box::new(view_info));
         let global = Position { x: 772, y: 7 };
         let local = coordinate_translator.to_local(&global);
         let expected = Some(Position { x: 1, y: 7 });
@@ -90,9 +98,17 @@ mod test {
     #[test]
     fn converts_to_out_of_bounds_local() {
         let (_scenario, view_info) = create_mock();
-        let coordinate_translator = CoordinateTranslatorImpl::new(Box::new(view_info));
+        let coordinate_translator = ScalingTranslatorImpl::new(Box::new(view_info));
         let global = Position { x: 3, y: 3 };
         let local = coordinate_translator.to_local(&global);
         assert_eq!(None, local);
+    }
+
+    #[test]
+    fn entity_returns_itself() {
+        let coordinate_translator = IdentityCoordinateTranslator;
+        let expected = Position { x: 10, y: 20 };
+        let actual = coordinate_translator.to_local(expected);
+        assert_eq!(expected, actual);
     }
 }
