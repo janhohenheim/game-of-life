@@ -9,8 +9,21 @@
 <body>
     <div class="centered">
         <canvas id="game-board" width="1000" height="1000"></canvas>
-        <script src="./dist/index.js"></script>
     </div>
+    <div class="centered">
+        <div class="game-menu">
+            <div class="game-menu__item filler">
+            </div>
+            <div class="game-menu__item game-menu__item--start-stop-button">
+                <button id="start-stop">Start</button>
+            </div>
+            <div class="game-menu__item">
+                Speed:
+                <input id="speed-slider" type="range" min="200" max="600" value="400" class="slider">
+            </div>
+        </div>
+    </div>
+    <script src="./dist/index.js"></script>
 </body>
 
 </html>
