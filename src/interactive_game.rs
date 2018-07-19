@@ -65,6 +65,7 @@ impl InteractiveGame for InteractiveGameImpl {
         let changes = self.generation_calculator.next_generation(&*self.grid);
         if !changes.is_empty() {
             self.presenter.present_changes(&changes);
+            self.accept_changes(&changes);
         }
     }
 
@@ -74,12 +75,9 @@ impl InteractiveGame for InteractiveGameImpl {
             position: *position,
             is_alive: should_be_alive,
         };
-        if change.is_alive {
-            self.grid.set_alive_at(*position);
-        } else {
-            self.grid.set_dead_at(*position);
-        }
-        self.presenter.present_changes(&[change]);
+        let changes = [change];
+        self.accept_changes(&changes);
+        self.presenter.present_changes(&changes);
     }
 }
 
