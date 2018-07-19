@@ -108,7 +108,7 @@ mod test {
     fn entity_returns_itself() {
         let coordinate_translator = IdentityCoordinateTranslator;
         let expected = Position { x: 10, y: 20 };
-        let actual = coordinate_translator.to_local(expected);
-        assert_eq!(expected, actual);
+        let actual = coordinate_translator.to_local(&expected);
+        assert_eq!(Some(expected), actual);
     }
 }
