@@ -17,6 +17,7 @@ sudo apt-get update && sudo apt-get install yarn
 
 yarn global add n
 sudo n latest
+yarn global add now
 yarn
 
 # The following assumes the env vars CADDY_ACCOUNT_ID and CADDY_API_KEY
