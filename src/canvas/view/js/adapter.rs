@@ -1,4 +1,4 @@
-use super::js::HTMLCanvasElement;
+use crate::canvas::view::js::HTMLCanvasElement;
 use crate::coordinate_translator::{Rect, ViewInfo};
 use crate::grid::Position;
 
