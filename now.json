@@ -3,6 +3,7 @@
     "alias": "wasm-jnferner",
     "files": [
         "index.html",
+        "style.css",
         "dist",
         "wasm_generated"
     ],
