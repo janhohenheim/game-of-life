@@ -124,14 +124,15 @@ fn get_lines(grid_info: &GridInfo) -> Vec<Line> {
 fn get_squares(grid_info: &GridInfo, changes: &[Change]) -> Vec<Square> {
     let mut squares = Vec::new();
     for change in changes {
-        let cell_width = grid_info.width / grid_info.columns - 2;
-        let cell_height = grid_info.height / grid_info.rows - 2;
+        let cell_width = grid_info.width / grid_info.columns;
+        let cell_height = grid_info.height / grid_info.rows;
+        const BORDER_THICKNESS: u32 = 1;
         squares.push(Square {
-            width: cell_width,
-            height: cell_height,
+            width: cell_width - BORDER_THICKNESS * 2,
+            height: cell_height - BORDER_THICKNESS * 2,
             origin: Position {
-                x: cell_width / 2 + change.position.x,
-                y: cell_height / 2 + change.position.y,
+                x: change.position.x * cell_width + BORDER_THICKNESS,
+                y: change.position.y * cell_height + BORDER_THICKNESS,
             },
             colour: if change.is_alive {
                 constant::ALIVE_CELL_COLOUR.into()
@@ -236,21 +237,21 @@ mod test {
     }
 
     #[test]
-    fn present_changes() {
+    fn presents_changes() {
         let (scenario, view) = create_mock();
         init_board(&scenario, &view);
         lazy_static!{
             static ref EXPECTED_VIEW_MODEL: CanvasViewModel = {
                 let mut squares = Vec::new();
                 for (x, y) in &[(2, 3), (3, 4), (1, 1)] {
-                    let cell_width = constant::CANVAS_WIDTH / WIDTH - 2;
-                    let cell_height = constant::CANVAS_HEIGHT / HEIGHT - 2;
+                    let cell_width = constant::CANVAS_WIDTH / WIDTH;
+                    let cell_height = constant::CANVAS_HEIGHT / HEIGHT;
                     squares.push(Square {
-                        width: cell_width,
-                        height: cell_height,
+                        width: cell_width - 2,
+                        height: cell_height - 2,
                         origin: Position {
-                            x: cell_width / 2 + x,
-                            y: cell_height / 2 + y,
+                            x: cell_width * x + 1,
+                            y: cell_height * y + 1,
                         },
                         colour: constant::ALIVE_CELL_COLOUR.into(),
                     });
