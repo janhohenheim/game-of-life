@@ -26,8 +26,6 @@ impl EntryPoint {
             columns: 100,
         };
         let context = canvas.get_context("2d");
-        let view_info = Box::new(canvas);
-        let coordinate_translator = Box::new(IdentityCoordinateTranslator);
         let view = Box::new(CanvasViewImpl::new(context));
         let presenter = Box::new(CanvasPresenter::new(view, grid_info.clone()));
         let generation_calculator = Box::new(GenerationCalculatorImpl::new());
@@ -37,6 +35,7 @@ impl EntryPoint {
             generation_calculator,
             presenter,
         ));
+        let coordinate_translator = Box::new(IdentityCoordinateTranslator);
         let input_handler = Box::new(ClickableInputHandlerImpl::new(
             game,
             coordinate_translator,
